@@ -20,10 +20,13 @@ package org.apache.tsfile.write;
 
 import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.common.conf.TSFileDescriptor;
+import org.apache.tsfile.encrypt.IEncryptor;
+import org.apache.tsfile.exception.encrypt.EncryptException;
 import org.apache.tsfile.exception.write.NoMeasurementException;
 import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.PlainDeviceID;
+import org.apache.tsfile.file.metadata.enums.EncryptionType;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.utils.MeasurementGroup;
 import org.apache.tsfile.write.chunk.AlignedChunkGroupWriterImpl;
@@ -45,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +71,8 @@ public class TsFileWriter implements AutoCloseable {
 
   /** IO writer of this TsFile. */
   private final TsFileIOWriter fileWriter;
+
+  private IEncryptor encryptor;
 
   private final int pageSize;
   private long recordCount = 0;
@@ -203,6 +209,46 @@ public class TsFileWriter implements AutoCloseable {
               + " size or decrease page size. ",
           pageSize,
           chunkGroupSizeThreshold);
+    }
+
+    String encryptLevel;
+    byte[] encryptKey;
+    byte[] dataEncryptKey;
+    EncryptionType encryptType;
+    if (config.getEncryptFlag()) {
+      encryptLevel = "2";
+      encryptType = config.getEncryptType();
+      try {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update("IoTDB is the best".getBytes());
+        md.update(config.getEncryptKey().getBytes());
+        dataEncryptKey = md.digest();
+        encryptKey =
+            IEncryptor.getEncryptor(config.getEncryptType(), config.getEncryptKey().getBytes())
+                .encrypt(dataEncryptKey);
+      } catch (Exception e) {
+        throw new EncryptException("md5 function not found while using md5 to generate data key");
+      }
+    } else {
+      encryptLevel = "0";
+      encryptType = EncryptionType.UNENCRYPTED;
+      encryptKey = null;
+      dataEncryptKey = null;
+    }
+    this.encryptor = IEncryptor.getEncryptor(encryptType, dataEncryptKey);
+    if (encryptKey != null) {
+      StringBuilder valueStr = new StringBuilder();
+
+      for (byte b : encryptKey) {
+        valueStr.append(b).append(",");
+      }
+
+      valueStr.deleteCharAt(valueStr.length() - 1);
+      String str = valueStr.toString();
+
+      fileWriter.setEncryptParam(encryptLevel, encryptType.getExtension(), str);
+    } else {
+      fileWriter.setEncryptParam(encryptLevel, encryptType.getExtension(), "");
     }
   }
 
@@ -466,13 +512,13 @@ public class TsFileWriter implements AutoCloseable {
     IChunkGroupWriter groupWriter;
     if (!groupWriters.containsKey(deviceId)) {
       if (isAligned) {
-        groupWriter = new AlignedChunkGroupWriterImpl(deviceId);
+        groupWriter = new AlignedChunkGroupWriterImpl(deviceId, encryptor);
         if (!isUnseq) { // Sequence File
           ((AlignedChunkGroupWriterImpl) groupWriter)
               .setLastTime(alignedDeviceLastTimeMap.getOrDefault(deviceId, -1L));
         }
       } else {
-        groupWriter = new NonAlignedChunkGroupWriterImpl(deviceId);
+        groupWriter = new NonAlignedChunkGroupWriterImpl(deviceId, encryptor);
         if (!isUnseq) { // Sequence File
           ((NonAlignedChunkGroupWriterImpl) groupWriter)
               .setLastTimeMap(
