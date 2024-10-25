@@ -117,14 +117,24 @@ public class TsFileIOWriter implements AutoCloseable {
   private volatile int chunkMetadataCount = 0;
   public static final String CHUNK_METADATA_TEMP_FILE_SUFFIX = ".meta";
 
-  protected String encryptLevel = "0";
+  protected String encryptLevel;
 
-  protected String encryptType = "UNENCRYPTED";
+  protected String encryptType;
 
-  protected String encryptKey = null;
+  protected String encryptKey;
 
   /** empty construct function. */
-  protected TsFileIOWriter() {}
+  protected TsFileIOWriter() {
+    if (TS_FILE_CONFIG.getEncryptFlag()) {
+      this.encryptLevel = "2";
+      this.encryptType = TS_FILE_CONFIG.getEncryptType();
+      this.encryptKey = EncryptUtils.normalKeyStr;
+    } else {
+      this.encryptLevel = "0";
+      this.encryptType = "org.apache.tsfile.encrypt.UNENCRYPTED";
+      this.encryptKey = null;
+    }
+  }
 
   /**
    * for writing a new tsfile.
@@ -145,11 +155,11 @@ public class TsFileIOWriter implements AutoCloseable {
     }
     if (conf.getEncryptFlag()) {
       this.encryptLevel = "2";
-      this.encryptType = conf.getEncryptType().getExtension();
+      this.encryptType = conf.getEncryptType();
       this.encryptKey = EncryptUtils.normalKeyStr;
     } else {
       this.encryptLevel = "0";
-      this.encryptType = "UNENCRYPTED";
+      this.encryptType = "org.apache.tsfile.encrypt.UNENCRYPTED";
       this.encryptKey = null;
     }
     startFile();
@@ -164,11 +174,11 @@ public class TsFileIOWriter implements AutoCloseable {
     this.out = output;
     if (TS_FILE_CONFIG.getEncryptFlag()) {
       this.encryptLevel = "2";
-      this.encryptType = TS_FILE_CONFIG.getEncryptType().getExtension();
+      this.encryptType = TS_FILE_CONFIG.getEncryptType();
       this.encryptKey = EncryptUtils.normalKeyStr;
     } else {
       this.encryptLevel = "0";
-      this.encryptType = "UNENCRYPTED";
+      this.encryptType = "org.apache.tsfile.encrypt.UNENCRYPTED";
       this.encryptKey = null;
     }
     startFile();

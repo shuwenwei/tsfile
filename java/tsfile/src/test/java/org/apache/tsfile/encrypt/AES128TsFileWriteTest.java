@@ -85,7 +85,7 @@ public class AES128TsFileWriteTest {
     prePageCheckThres = conf.getPageCheckSizeThreshold();
     conf.setPageCheckSizeThreshold(0);
     conf.setEncryptFlag("true");
-    conf.setEncryptType("AES128");
+    conf.setEncryptType("org.apache.tsfile.encrypt.AES128");
     conf.setEncryptKey("thisisourtestkey");
 
     try {
@@ -138,7 +138,7 @@ public class AES128TsFileWriteTest {
     conf.setPageSizeInByte(prePageSize);
     conf.setPageCheckSizeThreshold(prePageCheckThres);
     conf.setEncryptKey("abcdefghijklmnop");
-    conf.setEncryptType("UNENCRYPTED");
+    conf.setEncryptType("org.apache.tsfile.encrypt.UNENCRYPTED");
     conf.setEncryptFlag("false");
     File file = new File(inputDataFile);
     if (file.exists()) {
