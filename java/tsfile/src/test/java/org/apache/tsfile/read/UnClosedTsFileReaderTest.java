@@ -20,10 +20,9 @@
 package org.apache.tsfile.read;
 
 import org.apache.tsfile.constant.TestConstant;
-import org.apache.tsfile.encrypt.EncryptUtils;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.file.metadata.ChunkMetadata;
-import org.apache.tsfile.file.metadata.IDeviceID.Factory;
+import org.apache.tsfile.file.metadata.PlainDeviceID;
 import org.apache.tsfile.read.common.BatchData;
 import org.apache.tsfile.read.common.Chunk;
 import org.apache.tsfile.read.reader.chunk.ChunkReader;
@@ -46,9 +45,9 @@ public class UnClosedTsFileReaderTest {
   public void testRead() throws IOException {
     File file = new File(TestConstant.BASE_OUTPUT_PATH + File.separator + "test.tsfile");
     TsFileIOWriter writer = new TsFileIOWriter(file);
-    writer.startChunkGroup(Factory.DEFAULT_FACTORY.create("root.sg1.d1"));
+    writer.startChunkGroup(new PlainDeviceID("root.sg1.d1"));
     ChunkWriterImpl chunkWriter =
-        new ChunkWriterImpl(new MeasurementSchema("s1", TSDataType.INT64), EncryptUtils.encryptor);
+        new ChunkWriterImpl(new MeasurementSchema("s1", TSDataType.INT64));
     chunkWriter.write(1, 1L);
     chunkWriter.write(2, 2L);
     chunkWriter.write(3, 3L);

@@ -19,8 +19,8 @@
 package org.apache.tsfile.write.chunk;
 
 import org.apache.tsfile.common.constant.TsFileConstant;
+import org.apache.tsfile.encrypt.EncryptParameter;
 import org.apache.tsfile.encrypt.EncryptUtils;
-import org.apache.tsfile.encrypt.IEncryptor;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.IDeviceID;
@@ -54,25 +54,25 @@ public class NonAlignedChunkGroupWriterImpl implements IChunkGroupWriter {
   /** Map(measurementID, ChunkWriterImpl). Aligned measurementId is empty. */
   private final Map<String, ChunkWriterImpl> chunkWriters = new LinkedHashMap<>();
 
-  private IEncryptor encryptor;
+  private EncryptParameter encryptParam;
 
   // measurementId -> lastTime
   private Map<String, Long> lastTimeMap = new HashMap<>();
 
   public NonAlignedChunkGroupWriterImpl(IDeviceID deviceId) {
     this.deviceId = deviceId;
-    this.encryptor = EncryptUtils.encrypt.getEncryptor();
+    this.encryptParam = EncryptUtils.encryptParam;
   }
 
-  public NonAlignedChunkGroupWriterImpl(IDeviceID deviceId, IEncryptor encryptor) {
+  public NonAlignedChunkGroupWriterImpl(IDeviceID deviceId, EncryptParameter encryptParam) {
     this.deviceId = deviceId;
-    this.encryptor = encryptor;
+    this.encryptParam = encryptParam;
   }
 
   @Override
   public void tryToAddSeriesWriter(MeasurementSchema schema) {
     if (!chunkWriters.containsKey(schema.getMeasurementId())) {
-      this.chunkWriters.put(schema.getMeasurementId(), new ChunkWriterImpl(schema, encryptor));
+      this.chunkWriters.put(schema.getMeasurementId(), new ChunkWriterImpl(schema, encryptParam));
     }
   }
 
@@ -80,7 +80,7 @@ public class NonAlignedChunkGroupWriterImpl implements IChunkGroupWriter {
   public void tryToAddSeriesWriter(List<MeasurementSchema> schemas) {
     for (IMeasurementSchema schema : schemas) {
       if (!chunkWriters.containsKey(schema.getMeasurementId())) {
-        this.chunkWriters.put(schema.getMeasurementId(), new ChunkWriterImpl(schema, encryptor));
+        this.chunkWriters.put(schema.getMeasurementId(), new ChunkWriterImpl(schema, encryptParam));
       }
     }
   }
