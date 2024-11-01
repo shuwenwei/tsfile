@@ -178,7 +178,8 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <!--DO NOT UPDATE to 3.3.x, the release will fail-->
+                    <version>3.2.1</version>
                 </plugin>
                 <plugin>
                     <groupId>au.com.acegi</groupId>
@@ -533,7 +534,7 @@
                     <execution>
                         <id>create-source-package</id>
                         <goals>
-                            <goal>jar-no-fork</goal>
+                            <goal>jar</goal>
                         </goals>
                         <phase>package</phase>
                     </execution>
