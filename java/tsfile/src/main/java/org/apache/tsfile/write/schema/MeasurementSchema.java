@@ -48,9 +48,9 @@ public class MeasurementSchema
 
   private String measurementId;
   private TSDataType dataType;
-  private byte encoding;
+  private TSEncoding encoding;
+  private CompressionType compressionType;
   private TSEncodingBuilder encodingConverter;
-  private byte compressor;
   private Map<String, String> props = null;
 
   public MeasurementSchema() {}
@@ -96,22 +96,18 @@ public class MeasurementSchema
       Map<String, String> props) {
     this.dataType = dataType;
     this.measurementId = measurementId;
-    this.encoding = encoding.serialize();
+    this.encoding = encoding;
     this.props = props;
-    this.compressor = compressionType.serialize();
+    this.compressionType = compressionType;
   }
 
   public MeasurementSchema(
-      String measurementId,
-      byte type,
-      byte encoding,
-      byte compressionType,
-      Map<String, String> props) {
+      String measurementId, byte type, byte encoding, byte compressor, Map<String, String> props) {
     this.dataType = TSDataType.getTsDataType(type);
     this.measurementId = measurementId;
-    this.encoding = encoding;
+    this.encoding = TSEncoding.deserialize(encoding);
     this.props = props;
-    this.compressor = compressionType;
+    this.compressionType = CompressionType.deserialize(compressor);
   }
 
   /** function for deserializing data from input stream. */
@@ -122,9 +118,10 @@ public class MeasurementSchema
 
     measurementSchema.dataType = TSDataType.deserializeFrom(inputStream);
 
-    measurementSchema.encoding = ReadWriteIOUtils.readByte(inputStream);
+    measurementSchema.encoding = TSEncoding.deserialize(ReadWriteIOUtils.readByte(inputStream));
 
-    measurementSchema.compressor = ReadWriteIOUtils.readByte(inputStream);
+    measurementSchema.compressionType =
+        CompressionType.deserialize(ReadWriteIOUtils.readByte(inputStream));
 
     int size = ReadWriteIOUtils.readInt(inputStream);
     if (size > 0) {
@@ -149,9 +146,10 @@ public class MeasurementSchema
 
     measurementSchema.dataType = TSDataType.deserializeFrom(buffer);
 
-    measurementSchema.encoding = ReadWriteIOUtils.readByte(buffer);
+    measurementSchema.encoding = TSEncoding.deserialize(ReadWriteIOUtils.readByte(buffer));
 
-    measurementSchema.compressor = ReadWriteIOUtils.readByte(buffer);
+    measurementSchema.compressionType =
+        CompressionType.deserialize(ReadWriteIOUtils.readByte(buffer));
 
     int size = ReadWriteIOUtils.readInt(buffer);
     if (size > 0) {
@@ -175,9 +173,10 @@ public class MeasurementSchema
 
     measurementSchema.dataType = TSDataType.deserializeFrom(buffer);
 
-    measurementSchema.encoding = ReadWriteIOUtils.readByte(buffer);
+    measurementSchema.encoding = TSEncoding.deserialize(ReadWriteIOUtils.readByte(buffer));
 
-    measurementSchema.compressor = ReadWriteIOUtils.readByte(buffer);
+    measurementSchema.compressionType =
+        CompressionType.deserialize(ReadWriteIOUtils.readByte(buffer));
 
     return measurementSchema;
   }
@@ -203,7 +202,7 @@ public class MeasurementSchema
 
   @Override
   public TSEncoding getEncodingType() {
-    return TSEncoding.deserialize(encoding);
+    return encoding;
   }
 
   @Override
@@ -263,7 +262,7 @@ public class MeasurementSchema
     // it is ok even if encodingConverter is constructed two instances for concurrent scenario
     if (encodingConverter == null) {
       // initialize TSEncoding. e.g. set max error for PLA and SDT
-      encodingConverter = TSEncodingBuilder.getEncodingBuilder(TSEncoding.deserialize(encoding));
+      encodingConverter = TSEncodingBuilder.getEncodingBuilder(encoding);
       encodingConverter.initFromProps(props);
     }
     return encodingConverter.getEncoder(dataType);
@@ -271,7 +270,7 @@ public class MeasurementSchema
 
   @Override
   public CompressionType getCompressor() {
-    return CompressionType.deserialize(compressor);
+    return this.compressionType;
   }
 
   /** function for serializing data to output stream. */
@@ -285,7 +284,7 @@ public class MeasurementSchema
 
     byteLen += ReadWriteIOUtils.write(encoding, outputStream);
 
-    byteLen += ReadWriteIOUtils.write(compressor, outputStream);
+    byteLen += ReadWriteIOUtils.write(compressionType.serialize(), outputStream);
 
     if (props == null) {
       byteLen += ReadWriteIOUtils.write(0, outputStream);
@@ -329,7 +328,7 @@ public class MeasurementSchema
 
     byteLen += ReadWriteIOUtils.write(encoding, buffer);
 
-    byteLen += ReadWriteIOUtils.write(compressor, buffer);
+    byteLen += ReadWriteIOUtils.write(compressionType.serialize(), buffer);
 
     if (props == null) {
       byteLen += ReadWriteIOUtils.write(0, buffer);
@@ -352,7 +351,7 @@ public class MeasurementSchema
     byteLen += ReadWriteIOUtils.write(measurementId, outputStream);
     byteLen += ReadWriteIOUtils.write(dataType.serialize(), outputStream);
     byteLen += ReadWriteIOUtils.write(encoding, outputStream);
-    byteLen += ReadWriteIOUtils.write(compressor, outputStream);
+    byteLen += ReadWriteIOUtils.write(compressionType.serialize(), outputStream);
 
     return byteLen;
   }
@@ -370,7 +369,7 @@ public class MeasurementSchema
     byteLen += ReadWriteIOUtils.write(measurementId, buffer);
     byteLen += ReadWriteIOUtils.write(dataType.serialize(), buffer);
     byteLen += ReadWriteIOUtils.write(encoding, buffer);
-    byteLen += ReadWriteIOUtils.write(compressor, buffer);
+    byteLen += ReadWriteIOUtils.write(compressionType.serialize(), buffer);
 
     return byteLen;
   }
@@ -387,12 +386,12 @@ public class MeasurementSchema
     return dataType == that.dataType
         && encoding == that.encoding
         && Objects.equals(measurementId, that.measurementId)
-        && Objects.equals(compressor, that.compressor);
+        && compressionType == that.compressionType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataType, encoding, measurementId, compressor);
+    return Objects.hash(dataType, encoding, measurementId, compressionType);
   }
 
   /** compare by measurementID. */
@@ -414,16 +413,16 @@ public class MeasurementSchema
         ",",
         dataType.toString(),
         ",",
-        TSEncoding.deserialize(encoding).toString(),
+        encoding.toString(),
         ",",
         props == null ? "" : props.toString(),
         ",",
-        CompressionType.deserialize(compressor).toString());
+        compressionType.toString());
     sc.addTail("]");
     return sc.toString();
   }
 
-  public void setType(TSDataType dataType) {
+  public void setDataType(TSDataType dataType) {
     this.dataType = dataType;
   }
 
@@ -442,11 +441,11 @@ public class MeasurementSchema
     return this.measurementId.equals(measurementId);
   }
 
-  public void setEncoding(byte encoding) {
+  public void setEncoding(TSEncoding encoding) {
     this.encoding = encoding;
   }
 
-  public void setCompressor(byte compressor) {
-    this.compressor = compressor;
+  public void setCompressionType(CompressionType compressionType) {
+    this.compressionType = compressionType;
   }
 }
