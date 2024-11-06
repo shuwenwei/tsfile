@@ -32,7 +32,7 @@ import org.apache.tsfile.read.query.executor.task.DeviceTaskIterator;
 import org.apache.tsfile.read.reader.block.DeviceOrderedTsBlockReader;
 import org.apache.tsfile.read.reader.block.TsBlockReader;
 import org.apache.tsfile.read.reader.block.TsBlockReader.EmptyTsBlockReader;
-import org.apache.tsfile.write.record.Tablet.ColumnCategory;
+import org.apache.tsfile.write.record.Tablet.ColumnType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,9 +122,9 @@ public class TableQueryExecutor {
         throw new NoColumnException(columnName);
       }
 
-      final ColumnCategory columnCategory = schema.getColumnTypes().get(columnIndex);
+      final ColumnType columnType = schema.getColumnTypes().get(columnIndex);
       columnPosMap.computeIfAbsent(columnName, k -> new ArrayList<>()).add(i);
-      if (columnCategory.equals(ColumnCategory.ID)) {
+      if (columnType.equals(ColumnType.ID)) {
         idColumns.add(columnName);
       } else {
         measurementColumns.add(columnName);

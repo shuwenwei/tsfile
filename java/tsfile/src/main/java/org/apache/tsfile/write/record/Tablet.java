@@ -69,7 +69,7 @@ public class Tablet {
    * Marking the type of each column, namely ID or MEASUREMENT. Notice: the ID columns must be the
    * FIRST ones.
    */
-  private List<ColumnCategory> columnCategories;
+  private List<ColumnType> columnTypes;
 
   /** Columns in the list are all ID columns. */
   private List<Integer> idColumnIndexes = new ArrayList<>();
@@ -108,15 +108,13 @@ public class Tablet {
     this(
         insertTargetName,
         schemas,
-        ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, schemas.size()),
+        ColumnType.nCopy(ColumnType.MEASUREMENT, schemas.size()),
         maxRowNumber);
   }
 
   public Tablet(
-      String insertTargetName,
-      List<IMeasurementSchema> schemas,
-      List<ColumnCategory> columnCategories) {
-    this(insertTargetName, schemas, columnCategories, DEFAULT_SIZE);
+      String insertTargetName, List<IMeasurementSchema> schemas, List<ColumnType> columnTypes) {
+    this(insertTargetName, schemas, columnTypes, DEFAULT_SIZE);
   }
 
   /**
@@ -132,11 +130,11 @@ public class Tablet {
   public Tablet(
       String insertTargetName,
       List<IMeasurementSchema> schemas,
-      List<ColumnCategory> columnCategories,
+      List<ColumnType> columnTypes,
       int maxRowNumber) {
     this.insertTargetName = insertTargetName;
     this.schemas = new ArrayList<>(schemas);
-    setColumnTypes(columnCategories);
+    setColumnTypes(columnTypes);
     this.maxRowNumber = maxRowNumber;
     measurementIndex = new HashMap<>();
     constructMeasurementIndexMap();
@@ -168,7 +166,7 @@ public class Tablet {
     this(
         insertTargetName,
         schemas,
-        ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, schemas.size()),
+        ColumnType.nCopy(ColumnType.MEASUREMENT, schemas.size()),
         timestamps,
         values,
         bitMaps,
@@ -178,14 +176,14 @@ public class Tablet {
   public Tablet(
       String insertTargetName,
       List<IMeasurementSchema> schemas,
-      List<ColumnCategory> columnCategories,
+      List<ColumnType> columnTypes,
       long[] timestamps,
       Object[] values,
       BitMap[] bitMaps,
       int maxRowNumber) {
     this.insertTargetName = insertTargetName;
     this.schemas = schemas;
-    setColumnTypes(columnCategories);
+    setColumnTypes(columnTypes);
     this.timestamps = timestamps;
     this.values = values;
     this.bitMaps = bitMaps;
@@ -334,14 +332,14 @@ public class Tablet {
     int columnIndex = 0;
     for (int i = 0; i < schemas.size(); i++) {
       IMeasurementSchema schema = schemas.get(i);
-      ColumnCategory columnCategory = columnCategories.get(i);
+      ColumnType columnType = columnTypes.get(i);
       TSDataType dataType = schema.getType();
-      values[columnIndex] = createValueColumnOfDataType(dataType, columnCategory);
+      values[columnIndex] = createValueColumnOfDataType(dataType, columnType);
       columnIndex++;
     }
   }
 
-  private Object createValueColumnOfDataType(TSDataType dataType, ColumnCategory columnCategory) {
+  private Object createValueColumnOfDataType(TSDataType dataType, ColumnType columnType) {
 
     Object valueColumn;
     switch (dataType) {
@@ -400,13 +398,13 @@ public class Tablet {
       ReadWriteIOUtils.write(schemas.size(), stream);
       for (int i = 0; i < schemas.size(); i++) {
         IMeasurementSchema schema = schemas.get(i);
-        ColumnCategory columnCategory = columnCategories.get(i);
+        ColumnType columnType = columnTypes.get(i);
         if (schema == null) {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(false), stream);
         } else {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(true), stream);
           schema.serializeTo(stream);
-          ReadWriteIOUtils.write((byte) columnCategory.ordinal(), stream);
+          ReadWriteIOUtils.write((byte) columnType.ordinal(), stream);
         }
       }
     }
@@ -444,13 +442,13 @@ public class Tablet {
     if (values != null) {
       int size = (schemas == null ? 0 : schemas.size());
       for (int i = 0; i < size; i++) {
-        serializeColumn(schemas.get(i).getType(), values[i], stream, columnCategories.get(i));
+        serializeColumn(schemas.get(i).getType(), values[i], stream, columnTypes.get(i));
       }
     }
   }
 
   private void serializeColumn(
-      TSDataType dataType, Object column, DataOutputStream stream, ColumnCategory columnCategory)
+      TSDataType dataType, Object column, DataOutputStream stream, ColumnType columnType)
       throws IOException {
     ReadWriteIOUtils.write(BytesUtils.boolToByte(column != null), stream);
 
@@ -519,7 +517,7 @@ public class Tablet {
     // deserialize schemas
     int schemaSize = 0;
     List<IMeasurementSchema> schemas = new ArrayList<>();
-    List<ColumnCategory> columnCategories = new ArrayList<>();
+    List<ColumnType> columnTypes = new ArrayList<>();
     boolean isSchemasNotNull = BytesUtils.byteToBool(ReadWriteIOUtils.readByte(byteBuffer));
     if (isSchemasNotNull) {
       schemaSize = ReadWriteIOUtils.readInt(byteBuffer);
@@ -527,7 +525,7 @@ public class Tablet {
         boolean hasSchema = BytesUtils.byteToBool(ReadWriteIOUtils.readByte(byteBuffer));
         if (hasSchema) {
           schemas.add(MeasurementSchema.deserializeFrom(byteBuffer));
-          columnCategories.add(ColumnCategory.values()[byteBuffer.get()]);
+          columnTypes.add(ColumnType.values()[byteBuffer.get()]);
         }
       }
     }
@@ -554,12 +552,10 @@ public class Tablet {
     Object[] values = new Object[schemaSize];
     boolean isValuesNotNull = BytesUtils.byteToBool(ReadWriteIOUtils.readByte(byteBuffer));
     if (isValuesNotNull) {
-      values =
-          readTabletValuesFromBuffer(byteBuffer, dataTypes, columnCategories, schemaSize, rowSize);
+      values = readTabletValuesFromBuffer(byteBuffer, dataTypes, columnTypes, schemaSize, rowSize);
     }
 
-    Tablet tablet =
-        new Tablet(deviceId, schemas, columnCategories, times, values, bitMaps, rowSize);
+    Tablet tablet = new Tablet(deviceId, schemas, columnTypes, times, values, bitMaps, rowSize);
     tablet.constructMeasurementIndexMap();
     return tablet;
   }
@@ -580,14 +576,14 @@ public class Tablet {
 
   /**
    * @param byteBuffer data values
-   * @param columnCategories
+   * @param columnTypes
    * @param columns column number
    */
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
   public static Object[] readTabletValuesFromBuffer(
       ByteBuffer byteBuffer,
       TSDataType[] types,
-      List<ColumnCategory> columnCategories,
+      List<ColumnType> columnTypes,
       int columns,
       int rowSize) {
     Object[] values = new Object[columns];
@@ -688,7 +684,7 @@ public class Tablet {
         that.rowSize == rowSize
             && Objects.equals(that.insertTargetName, insertTargetName)
             && Objects.equals(that.schemas, schemas)
-            && Objects.equals(that.columnCategories, columnCategories)
+            && Objects.equals(that.columnTypes, columnTypes)
             && Objects.equals(that.measurementIndex, measurementIndex);
     if (!flag) {
       return false;
@@ -917,24 +913,24 @@ public class Tablet {
     return new StringArrayDeviceID(idArray);
   }
 
-  public void setColumnTypes(List<ColumnCategory> columnCategories) {
-    this.columnCategories = columnCategories;
+  public void setColumnTypes(List<ColumnType> columnTypes) {
+    this.columnTypes = columnTypes;
     idColumnIndexes.clear();
-    for (int i = 0; i < columnCategories.size(); i++) {
-      ColumnCategory columnCategory = columnCategories.get(i);
-      if (columnCategory.equals(ColumnCategory.ID)) {
+    for (int i = 0; i < columnTypes.size(); i++) {
+      ColumnType columnType = columnTypes.get(i);
+      if (columnType.equals(ColumnType.ID)) {
         idColumnIndexes.add(i);
       }
     }
   }
 
-  public enum ColumnCategory {
+  public enum ColumnType {
     ID,
     MEASUREMENT,
     ATTRIBUTE;
 
-    public static List<ColumnCategory> nCopy(ColumnCategory type, int n) {
-      List<ColumnCategory> result = new ArrayList<>(n);
+    public static List<ColumnType> nCopy(ColumnType type, int n) {
+      List<ColumnType> result = new ArrayList<>(n);
       for (int i = 0; i < n; i++) {
         result.add(type);
       }
@@ -973,7 +969,7 @@ public class Tablet {
     this.insertTargetName = tableName;
   }
 
-  public List<ColumnCategory> getColumnTypes() {
-    return columnCategories;
+  public List<ColumnType> getColumnTypes() {
+    return columnTypes;
   }
 }
