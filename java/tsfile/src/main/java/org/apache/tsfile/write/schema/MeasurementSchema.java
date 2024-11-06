@@ -47,7 +47,7 @@ public class MeasurementSchema
     implements IMeasurementSchema, Comparable<MeasurementSchema>, Serializable {
 
   private String measurementId;
-  private byte type;
+  private TSDataType dataType;
   private byte encoding;
   private TSEncodingBuilder encodingConverter;
   private byte compressor;
@@ -55,28 +55,31 @@ public class MeasurementSchema
 
   public MeasurementSchema() {}
 
-  public MeasurementSchema(String measurementId, TSDataType tsDataType) {
+  public MeasurementSchema(String measurementId, TSDataType dataType) {
     this(
         measurementId,
-        tsDataType,
+        dataType,
         TSEncoding.valueOf(TSFileDescriptor.getInstance().getConfig().getValueEncoder()),
         TSFileDescriptor.getInstance().getConfig().getCompressor(),
         null);
   }
 
   /** set properties as an empty Map. */
-  public MeasurementSchema(String measurementId, TSDataType type, TSEncoding encoding) {
+  public MeasurementSchema(String measurementId, TSDataType dataType, TSEncoding encoding) {
     this(
         measurementId,
-        type,
+        dataType,
         encoding,
         TSFileDescriptor.getInstance().getConfig().getCompressor(),
         null);
   }
 
   public MeasurementSchema(
-      String measurementId, TSDataType type, TSEncoding encoding, CompressionType compressionType) {
-    this(measurementId, type, encoding, compressionType, null);
+      String measurementId,
+      TSDataType dataType,
+      TSEncoding encoding,
+      CompressionType compressionType) {
+    this(measurementId, dataType, encoding, compressionType, null);
   }
 
   /**
@@ -87,11 +90,11 @@ public class MeasurementSchema
    */
   public MeasurementSchema(
       String measurementId,
-      TSDataType type,
+      TSDataType dataType,
       TSEncoding encoding,
       CompressionType compressionType,
       Map<String, String> props) {
-    this.type = type.serialize();
+    this.dataType = dataType;
     this.measurementId = measurementId;
     this.encoding = encoding.serialize();
     this.props = props;
@@ -104,7 +107,7 @@ public class MeasurementSchema
       byte encoding,
       byte compressionType,
       Map<String, String> props) {
-    this.type = type;
+    this.dataType = TSDataType.getTsDataType(type);
     this.measurementId = measurementId;
     this.encoding = encoding;
     this.props = props;
@@ -117,7 +120,7 @@ public class MeasurementSchema
 
     measurementSchema.measurementId = ReadWriteIOUtils.readString(inputStream);
 
-    measurementSchema.type = ReadWriteIOUtils.readByte(inputStream);
+    measurementSchema.dataType = TSDataType.deserializeFrom(inputStream);
 
     measurementSchema.encoding = ReadWriteIOUtils.readByte(inputStream);
 
@@ -144,7 +147,7 @@ public class MeasurementSchema
 
     measurementSchema.measurementId = ReadWriteIOUtils.readString(buffer);
 
-    measurementSchema.type = ReadWriteIOUtils.readByte(buffer);
+    measurementSchema.dataType = TSDataType.deserializeFrom(buffer);
 
     measurementSchema.encoding = ReadWriteIOUtils.readByte(buffer);
 
@@ -170,7 +173,7 @@ public class MeasurementSchema
 
     measurementSchema.measurementId = ReadWriteIOUtils.readString(buffer);
 
-    measurementSchema.type = ReadWriteIOUtils.readByte(buffer);
+    measurementSchema.dataType = TSDataType.deserializeFrom(buffer);
 
     measurementSchema.encoding = ReadWriteIOUtils.readByte(buffer);
 
@@ -205,12 +208,12 @@ public class MeasurementSchema
 
   @Override
   public TSDataType getType() {
-    return TSDataType.deserialize(type);
+    return dataType;
   }
 
   @Override
   public byte getTypeInByte() {
-    return type;
+    return dataType.serialize();
   }
 
   @Override
@@ -263,7 +266,7 @@ public class MeasurementSchema
       encodingConverter = TSEncodingBuilder.getEncodingBuilder(TSEncoding.deserialize(encoding));
       encodingConverter.initFromProps(props);
     }
-    return encodingConverter.getEncoder(TSDataType.deserialize(type));
+    return encodingConverter.getEncoder(dataType);
   }
 
   @Override
@@ -278,7 +281,7 @@ public class MeasurementSchema
 
     byteLen += ReadWriteIOUtils.write(measurementId, outputStream);
 
-    byteLen += ReadWriteIOUtils.write(type, outputStream);
+    byteLen += ReadWriteIOUtils.write(dataType.serialize(), outputStream);
 
     byteLen += ReadWriteIOUtils.write(encoding, outputStream);
 
@@ -322,7 +325,7 @@ public class MeasurementSchema
 
     byteLen += ReadWriteIOUtils.write(measurementId, buffer);
 
-    byteLen += ReadWriteIOUtils.write(type, buffer);
+    byteLen += ReadWriteIOUtils.write(dataType.serialize(), buffer);
 
     byteLen += ReadWriteIOUtils.write(encoding, buffer);
 
@@ -347,7 +350,7 @@ public class MeasurementSchema
 
     byteLen += ReadWriteIOUtils.write((byte) 0, outputStream);
     byteLen += ReadWriteIOUtils.write(measurementId, outputStream);
-    byteLen += ReadWriteIOUtils.write(type, outputStream);
+    byteLen += ReadWriteIOUtils.write(dataType.serialize(), outputStream);
     byteLen += ReadWriteIOUtils.write(encoding, outputStream);
     byteLen += ReadWriteIOUtils.write(compressor, outputStream);
 
@@ -365,7 +368,7 @@ public class MeasurementSchema
 
     byteLen += ReadWriteIOUtils.write((byte) 0, buffer);
     byteLen += ReadWriteIOUtils.write(measurementId, buffer);
-    byteLen += ReadWriteIOUtils.write(type, buffer);
+    byteLen += ReadWriteIOUtils.write(dataType.serialize(), buffer);
     byteLen += ReadWriteIOUtils.write(encoding, buffer);
     byteLen += ReadWriteIOUtils.write(compressor, buffer);
 
@@ -381,7 +384,7 @@ public class MeasurementSchema
       return false;
     }
     MeasurementSchema that = (MeasurementSchema) o;
-    return type == that.type
+    return dataType == that.dataType
         && encoding == that.encoding
         && Objects.equals(measurementId, that.measurementId)
         && Objects.equals(compressor, that.compressor);
@@ -389,7 +392,7 @@ public class MeasurementSchema
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, encoding, measurementId, compressor);
+    return Objects.hash(dataType, encoding, measurementId, compressor);
   }
 
   /** compare by measurementID. */
@@ -409,7 +412,7 @@ public class MeasurementSchema
         "[",
         measurementId,
         ",",
-        TSDataType.deserialize(type).toString(),
+        dataType.toString(),
         ",",
         TSEncoding.deserialize(encoding).toString(),
         ",",
@@ -420,8 +423,8 @@ public class MeasurementSchema
     return sc.toString();
   }
 
-  public void setType(TSDataType type) {
-    this.type = type.serialize();
+  public void setType(TSDataType dataType) {
+    this.dataType = dataType;
   }
 
   @Override
