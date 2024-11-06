@@ -110,7 +110,7 @@ public class TsFileTool {
       String tableName,
       Map<String, Object> defaultMap) {
     List<IMeasurementSchema> measurementSchemas = new ArrayList<>();
-    List<Tablet.ColumnType> columnTypes = new ArrayList<>();
+    List<Tablet.ColumnCategory> columnCategories = new ArrayList<>();
     List<String> idSchemaList = new ArrayList<>();
     for (SchemaParser.IDColumns idSchema : idColumnList) {
       if (idSchema.isDefault) {
@@ -120,7 +120,7 @@ public class TsFileTool {
       measurementSchemas.add(
           new MeasurementSchema(
               idSchema.name, TSDataType.TEXT, TSEncoding.PLAIN, CompressionType.UNCOMPRESSED));
-      columnTypes.add(Tablet.ColumnType.ID);
+      columnCategories.add(Tablet.ColumnCategory.ID);
     }
     List<SchemaParser.Column> newColumnList = new ArrayList<>();
 
@@ -139,9 +139,9 @@ public class TsFileTool {
               TSDataType.valueOf(column.type),
               TSEncoding.PLAIN,
               CompressionType.UNCOMPRESSED));
-      columnTypes.add(Tablet.ColumnType.MEASUREMENT);
+      columnCategories.add(Tablet.ColumnCategory.MEASUREMENT);
     }
-    return new TableSchema(tableName, measurementSchemas, columnTypes);
+    return new TableSchema(tableName, measurementSchemas, columnCategories);
   }
 
   private static boolean writeTsFile(
@@ -258,7 +258,8 @@ public class TsFileTool {
     return parsedLines;
   }
 
-  public static Object getValue(TSDataType dataType, String i, Tablet.ColumnType columnType) {
+  public static Object getValue(
+      TSDataType dataType, String i, Tablet.ColumnCategory columnCategory) {
     switch (dataType) {
       case INT64:
         return Long.valueOf(i);
@@ -267,7 +268,7 @@ public class TsFileTool {
       case BOOLEAN:
         return Boolean.valueOf(i);
       case TEXT:
-        if (columnType.equals(Tablet.ColumnType.MEASUREMENT)) {
+        if (columnCategory.equals(Tablet.ColumnCategory.MEASUREMENT)) {
           return new Binary(String.valueOf(i), StandardCharsets.UTF_8);
         } else {
           return String.valueOf(i);

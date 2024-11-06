@@ -54,7 +54,7 @@ public class VectorMeasurementSchemaStub extends VectorMeasurementSchema {
   }
 
   @Override
-  public void setType(TSDataType dataType) {
+  public void setDataType(TSDataType dataType) {
     throw new UnsupportedOperationException("unsupported method for VectorMeasurementSchema");
   }
 

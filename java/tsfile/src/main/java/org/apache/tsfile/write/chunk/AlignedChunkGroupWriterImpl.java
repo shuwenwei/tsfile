@@ -33,7 +33,7 @@ import org.apache.tsfile.utils.Binary;
 import org.apache.tsfile.utils.DateUtils;
 import org.apache.tsfile.write.UnSupportedDataTypeException;
 import org.apache.tsfile.write.record.Tablet;
-import org.apache.tsfile.write.record.Tablet.ColumnType;
+import org.apache.tsfile.write.record.Tablet.ColumnCategory;
 import org.apache.tsfile.write.record.datapoint.DataPoint;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.writer.TsFileIOWriter;
@@ -213,7 +213,7 @@ public class AlignedChunkGroupWriterImpl implements IChunkGroupWriter {
       checkIsHistoryData(time);
       for (int columnIndex = 0; columnIndex < tablet.getSchemas().size(); columnIndex++) {
         if (tablet.getColumnTypes() != null
-            && tablet.getColumnTypes().get(columnIndex) != ColumnType.MEASUREMENT) {
+            && tablet.getColumnTypes().get(columnIndex) != ColumnCategory.MEASUREMENT) {
           continue;
         }
 
