@@ -291,7 +291,14 @@ public class PerformanceTest {
         ColumnCategory.nCopy(ColumnCategory.ID, idSchemas.size());
     allSchema.addAll(measurementSchemas);
     columnCategories.addAll(ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, measurementSchemaCnt));
-    return new Tablet(null, allSchema, columnCategories, pointPerSeries);
+    return new Tablet(
+        null,
+        measurementSchemas.stream()
+            .map(IMeasurementSchema::getMeasurementName)
+            .collect(Collectors.toList()),
+        measurementSchemas.stream().map(IMeasurementSchema::getType).collect(Collectors.toList()),
+        columnCategories,
+        pointPerSeries);
   }
 
   private void fillTableTablet(Tablet tablet, int tableNum, int deviceNum, int tabletNum) {

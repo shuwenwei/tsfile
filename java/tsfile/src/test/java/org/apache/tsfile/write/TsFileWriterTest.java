@@ -204,20 +204,6 @@ public class TsFileWriterTest {
   }
 
   @Test
-  public void writeIncorrectTSRecord0() throws IOException {
-    // incorrect data type
-    TSRecord record = new TSRecord(10002, "d2");
-    record.addTuple(new IntDataPoint("s1", 5));
-    try {
-      writer.writeRecord(record);
-    } catch (WriteProcessException e) {
-      Assert.assertEquals("No measurement for nonAligned", e.getMessage());
-    }
-    closeFile();
-    readNothing();
-  }
-
-  @Test
   public void writeIncorrectTSRecords() throws IOException, WriteProcessException {
     // incorrect data type
     for (int i = 2; i < 3; i++) {
@@ -297,7 +283,7 @@ public class TsFileWriterTest {
   @Test
   public void flushForTest() throws IOException {
     // The interface is just for test
-    writer.flushAllChunkGroups();
+    writer.flush();
     closeFile();
     readNothing();
   }
@@ -305,7 +291,7 @@ public class TsFileWriterTest {
   @Test
   public void flushForTestWithVersion() throws IOException {
     // The interface is just for test
-    writer.flushAllChunkGroups();
+    writer.flush();
     closeFile();
     readNothing();
   }

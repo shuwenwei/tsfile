@@ -577,7 +577,7 @@ public class TsFileWriter implements AutoCloseable {
       if (memSize > chunkGroupSizeThreshold) {
         LOG.debug("start to flush chunk groups, memory space occupy:{}", memSize);
         recordCountForNextMemCheck = recordCount * chunkGroupSizeThreshold / memSize;
-        return flushAllChunkGroups();
+        return flush();
       } else {
         recordCountForNextMemCheck = recordCount * chunkGroupSizeThreshold / memSize;
         return false;
@@ -594,7 +594,7 @@ public class TsFileWriter implements AutoCloseable {
    *     function just return false, the Override of IoTDB may return true.
    * @throws IOException exception in IO
    */
-  public boolean flushAllChunkGroups() throws IOException {
+  public boolean flush() throws IOException {
     if (recordCount > 0) {
       for (Map.Entry<IDeviceID, IChunkGroupWriter> entry : groupWriters.entrySet()) {
         IDeviceID deviceId = entry.getKey();
@@ -653,7 +653,7 @@ public class TsFileWriter implements AutoCloseable {
   @Override
   public void close() throws IOException {
     LOG.info("start close file");
-    flushAllChunkGroups();
+    flush();
     fileWriter.endFile();
   }
 

@@ -78,7 +78,7 @@ public class ForceAppendTsFileWriterTest {
         new TSRecord(2, "d1")
             .addTuple(new FloatDataPoint("s1", 5))
             .addTuple(new FloatDataPoint("s2", 4)));
-    writer.flushAllChunkGroups();
+    writer.flush();
 
     long firstMetadataPosition = writer.getIOWriter().getPos();
     writer.close();

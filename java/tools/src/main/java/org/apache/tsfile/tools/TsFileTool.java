@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class TsFileTool {
   private static int THREAD_COUNT = 8;
@@ -193,7 +194,12 @@ public class TsFileTool {
     Tablet tablet =
         new Tablet(
             tableSchema.getTableName(),
-            tableSchema.getColumnSchemas(),
+            tableSchema.getColumnSchemas().stream()
+                .map(IMeasurementSchema::getMeasurementName)
+                .collect(Collectors.toList()),
+            tableSchema.getColumnSchemas().stream()
+                .map(IMeasurementSchema::getType)
+                .collect(Collectors.toList()),
             tableSchema.getColumnTypes(),
             num);
 

@@ -20,6 +20,7 @@ package org.apache.tsfile.read.query.timegenerator;
 
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.exception.write.WriteProcessException;
+import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.tsfile.read.TsFileReader;
 import org.apache.tsfile.read.TsFileSequenceReader;
@@ -124,6 +125,10 @@ public class ReadWriteTest {
         TEMPLATE_NAME, new MeasurementSchema("s3", TSDataType.INT32, TSEncoding.TS_2DIFF));
 
     TsFileWriter tsFileWriter = new TsFileWriter(f, schema);
+
+    IDeviceID d1 = IDeviceID.Factory.DEFAULT_FACTORY.create("d1");
+    tsFileWriter.registerTimeseries(d1, new MeasurementSchema("s1", TSDataType.FLOAT));
+    tsFileWriter.registerTimeseries(d1, new MeasurementSchema("s2", TSDataType.INT32));
 
     // construct TSRecord
     TSRecord tsRecord = new TSRecord(1, "d1");

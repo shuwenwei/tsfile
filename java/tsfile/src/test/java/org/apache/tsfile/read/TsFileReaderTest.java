@@ -101,7 +101,7 @@ public class TsFileReaderTest {
     TSRecord t = new TSRecord(101011000000L, "t");
     t.addTuple(new IntDataPoint("id", 8000001));
     tsFileWriter.writeRecord(t);
-    tsFileWriter.flushAllChunkGroups();
+    tsFileWriter.flush();
     tsFileWriter.close();
 
     TsFileReader tsFileReader = new TsFileReader(new TsFileSequenceReader(filePath));

@@ -96,27 +96,29 @@ public class Tablet {
    * Return a {@link Tablet} with default specified row number. This is the standard constructor
    * (all Tablet should be the same size).
    *
-   * @param insertTargetName the name of the device specified to be written in
+   * @param deviceId the name of the device specified to be written in
    * @param schemas the list of {@link MeasurementSchema}s for creating the tablet, only
    *     measurementId and type take effects
    */
-  public Tablet(String insertTargetName, List<IMeasurementSchema> schemas) {
-    this(insertTargetName, schemas, DEFAULT_SIZE);
+  public Tablet(String deviceId, List<IMeasurementSchema> schemas) {
+    this(deviceId, schemas, DEFAULT_SIZE);
   }
 
-  public Tablet(String insertTargetName, List<IMeasurementSchema> schemas, int maxRowNumber) {
-    this(
-        insertTargetName,
-        schemas,
-        ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, schemas.size()),
-        maxRowNumber);
+  public Tablet(String deviceId, List<IMeasurementSchema> schemas, int maxRowNumber) {
+    this.insertTargetName = deviceId;
+    this.schemas = schemas;
+    setColumnCategories(ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, schemas.size()));
+    this.maxRowNumber = maxRowNumber;
+    measurementIndex = new HashMap<>();
+    constructMeasurementIndexMap();
+
+    createColumns();
+
+    reset();
   }
 
-  public Tablet(
-      String insertTargetName,
-      List<IMeasurementSchema> schemas,
-      List<ColumnCategory> columnCategories) {
-    this(insertTargetName, schemas, columnCategories, DEFAULT_SIZE);
+  public Tablet(String deviceId, List<String> measurementList, List<TSDataType> dataTypeList) {
+    this(deviceId, measurementList, dataTypeList, DEFAULT_SIZE);
   }
 
   /**
@@ -124,20 +126,42 @@ public class Tablet {
    * constructor directly for testing purposes. {@link Tablet} should normally always be default
    * size.
    *
-   * @param insertTargetName the name of the device specified to be written in
-   * @param schemas the list of {@link MeasurementSchema}s for creating the row batch, only
-   *     measurementId and type take effects
-   * @param maxRowNumber the maximum number of rows for this tablet
+   * @param deviceId the name of the device specified to be written in
+   * @param measurementList the list of measurement names for creating the row batch
+   * @param dataTypeList the list of {@link TSDataType}s for creating the row batch
+   * @param maxRowNum the maximum number of rows for this tablet
    */
   public Tablet(
-      String insertTargetName,
-      List<IMeasurementSchema> schemas,
-      List<ColumnCategory> columnCategories,
-      int maxRowNumber) {
-    this.insertTargetName = insertTargetName;
-    this.schemas = new ArrayList<>(schemas);
-    setColumnTypes(columnCategories);
-    this.maxRowNumber = maxRowNumber;
+      String deviceId, List<String> measurementList, List<TSDataType> dataTypeList, int maxRowNum) {
+    this(
+        deviceId,
+        measurementList,
+        dataTypeList,
+        ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, measurementList.size()),
+        maxRowNum);
+  }
+
+  public Tablet(
+      String tableName,
+      List<String> measurementList,
+      List<TSDataType> dataTypeList,
+      List<ColumnCategory> columnCategoryList) {
+    this(tableName, measurementList, dataTypeList, columnCategoryList, DEFAULT_SIZE);
+  }
+
+  public Tablet(
+      String tableName,
+      List<String> measurementList,
+      List<TSDataType> dataTypeList,
+      List<ColumnCategory> columnCategoryList,
+      int maxRowNum) {
+    this.insertTargetName = tableName;
+    this.schemas = new ArrayList<>(measurementList.size());
+    for (int i = 0; i < measurementList.size(); i++) {
+      this.schemas.add(new MeasurementSchema(measurementList.get(i), dataTypeList.get(i)));
+    }
+    setColumnCategories(columnCategoryList);
+    this.maxRowNumber = maxRowNum;
     measurementIndex = new HashMap<>();
     constructMeasurementIndexMap();
 
@@ -150,7 +174,7 @@ public class Tablet {
    * Return a {@link Tablet} with specified timestamps and values. Only call this constructor
    * directly for Trigger.
    *
-   * @param insertTargetName the name of the device specified to be written in
+   * @param deviceId the name of the device specified to be written in
    * @param schemas the list of {@link MeasurementSchema}s for creating the row batch, only
    *     measurementId and type take effects
    * @param timestamps given timestamps
@@ -159,14 +183,14 @@ public class Tablet {
    * @param maxRowNumber the maximum number of rows for this {@link Tablet}
    */
   public Tablet(
-      String insertTargetName,
+      String deviceId,
       List<IMeasurementSchema> schemas,
       long[] timestamps,
       Object[] values,
       BitMap[] bitMaps,
       int maxRowNumber) {
     this(
-        insertTargetName,
+        deviceId,
         schemas,
         ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, schemas.size()),
         timestamps,
@@ -185,7 +209,7 @@ public class Tablet {
       int maxRowNumber) {
     this.insertTargetName = insertTargetName;
     this.schemas = schemas;
-    setColumnTypes(columnCategories);
+    setColumnCategories(columnCategories);
     this.timestamps = timestamps;
     this.values = values;
     this.bitMaps = bitMaps;
@@ -215,12 +239,15 @@ public class Tablet {
   public void initBitMaps() {
     this.bitMaps = new BitMap[schemas.size()];
     for (int column = 0; column < schemas.size(); column++) {
-      this.bitMaps[column] = new BitMap(getMaxRowNumber());
+      BitMap bitMap = new BitMap(getMaxRowNumber());
+      bitMap.markAll();
+      this.bitMaps[column] = bitMap;
     }
   }
 
   public void addTimestamp(int rowIndex, long timestamp) {
     timestamps[rowIndex] = timestamp;
+    this.rowSize = Math.max(this.rowSize, rowIndex + 1);
   }
 
   public void addValue(final String measurementId, final int rowIndex, final Object value) {
@@ -232,17 +259,8 @@ public class Tablet {
   private void addValueOfDataType(
       final TSDataType dataType, final int rowIndex, final int indexOfSchema, final Object value) {
 
-    if (value == null) {
-      // Init the bitMap to mark null value
-      if (bitMaps == null) {
-        bitMaps = new BitMap[values.length];
-      }
-      if (bitMaps[indexOfSchema] == null) {
-        bitMaps[indexOfSchema] = new BitMap(maxRowNumber);
-      }
-      // Mark the null value position
-      bitMaps[indexOfSchema].mark(rowIndex);
-    }
+    // Mark the null value position
+    updateBitMap(rowIndex, indexOfSchema, value == null);
     switch (dataType) {
       case TEXT:
       case STRING:
@@ -301,6 +319,105 @@ public class Tablet {
     }
   }
 
+  public void addValue(int rowIndex, String measurement, int val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, int val) {
+    final int[] sensor = (int[]) values[columnIndex];
+    sensor[rowIndex] = val;
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, long val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, long val) {
+    final long[] sensor = (long[]) values[columnIndex];
+    sensor[rowIndex] = val;
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, float val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, float val) {
+    final float[] sensor = (float[]) values[columnIndex];
+    sensor[rowIndex] = val;
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, double val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, double val) {
+    final double[] sensor = (double[]) values[columnIndex];
+    sensor[rowIndex] = val;
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, boolean val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, boolean val) {
+    final boolean[] sensor = (boolean[]) values[columnIndex];
+    sensor[rowIndex] = val;
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, String val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, String val) {
+    final Binary[] sensor = (Binary[]) values[columnIndex];
+    sensor[rowIndex] = new Binary(val, TSFileConfig.STRING_CHARSET);
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, byte[] val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, byte[] val) {
+    final Binary[] sensor = (Binary[]) values[columnIndex];
+    sensor[rowIndex] = new Binary(val);
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  public void addValue(int rowIndex, String measurement, LocalDate val) {
+    Integer columnIndex = measurementIndex.get(measurement);
+    addValue(rowIndex, columnIndex, val);
+  }
+
+  public void addValue(int rowIndex, int columnIndex, LocalDate val) {
+    final LocalDate[] sensor = (LocalDate[]) values[columnIndex];
+    sensor[rowIndex] = val;
+    updateBitMap(rowIndex, columnIndex, false);
+  }
+
+  private void updateBitMap(int rowIndex, int columnIndex, boolean mark) {
+    if (bitMaps == null) {
+      initBitMaps();
+    }
+    if (mark) {
+      bitMaps[columnIndex].mark(rowIndex);
+    } else {
+      bitMaps[columnIndex].unmark(rowIndex);
+    }
+  }
+
   public List<IMeasurementSchema> getSchemas() {
     return schemas;
   }
@@ -313,13 +430,6 @@ public class Tablet {
   /** Reset Tablet to the default state - set the rowSize to 0 and reset bitMaps */
   public void reset() {
     rowSize = 0;
-    if (bitMaps != null) {
-      for (BitMap bitMap : bitMaps) {
-        if (bitMap != null) {
-          bitMap.reset();
-        }
-      }
-    }
   }
 
   private void createColumns() {
@@ -917,7 +1027,7 @@ public class Tablet {
     return new StringArrayDeviceID(idArray);
   }
 
-  public void setColumnTypes(List<ColumnCategory> columnCategories) {
+  public void setColumnCategories(List<ColumnCategory> columnCategories) {
     this.columnCategories = columnCategories;
     idColumnIndexes.clear();
     for (int i = 0; i < columnCategories.size(); i++) {
