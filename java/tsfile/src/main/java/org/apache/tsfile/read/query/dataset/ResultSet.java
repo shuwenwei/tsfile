@@ -20,12 +20,14 @@
 package org.apache.tsfile.read.query.dataset;
 
 import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.read.common.Field;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.common.RowRecord;
 import org.apache.tsfile.utils.Binary;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +40,11 @@ public class ResultSet {
 
   public ResultSet(QueryDataSet queryDataSet) {
     this.queryDataSet = queryDataSet;
+    // add Time column at first position
     this.resultSetMetadata =
         new ResultSetMetadata(queryDataSet.getPaths(), queryDataSet.getDataTypes());
-    this.columnNameToColumnIndexMap = new HashMap<>(queryDataSet.getColumnNum());
-    for (int columnIndex = 1; columnIndex <= queryDataSet.getColumnNum(); columnIndex++) {
+    this.columnNameToColumnIndexMap = new HashMap<>(resultSetMetadata.getColumnNum());
+    for (int columnIndex = 1; columnIndex <= resultSetMetadata.getColumnNum(); columnIndex++) {
       this.columnNameToColumnIndexMap.put(
           resultSetMetadata.getColumnName(columnIndex), columnIndex);
     }
@@ -52,11 +55,14 @@ public class ResultSet {
   }
 
   public boolean next() throws IOException {
-    if (!queryDataSet.hasNext()) {
-      return false;
+    while (queryDataSet.hasNext()) {
+      currentRow = queryDataSet.next();
+      if (currentRow.isAllNull()) {
+        continue;
+      }
+      return true;
     }
-    currentRow = queryDataSet.next();
-    return true;
+    return false;
   }
 
   public int getInt(String columnName) {
@@ -65,7 +71,7 @@ public class ResultSet {
   }
 
   public int getInt(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getIntV();
+    return getField(columnIndex).getIntV();
   }
 
   public long getLong(String columnName) {
@@ -74,7 +80,7 @@ public class ResultSet {
   }
 
   public long getLong(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getLongV();
+    return getField(columnIndex).getLongV();
   }
 
   public float getFloat(String columnName) {
@@ -83,7 +89,7 @@ public class ResultSet {
   }
 
   public float getFloat(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getFloatV();
+    return getField(columnIndex).getFloatV();
   }
 
   public double getDouble(String columnName) {
@@ -92,7 +98,7 @@ public class ResultSet {
   }
 
   public double getDouble(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getDoubleV();
+    return getField(columnIndex).getDoubleV();
   }
 
   public boolean getBoolean(String columnName) {
@@ -101,7 +107,7 @@ public class ResultSet {
   }
 
   public boolean getBoolean(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getBoolV();
+    return getField(columnIndex).getBoolV();
   }
 
   public String getString(String columnName) {
@@ -110,7 +116,7 @@ public class ResultSet {
   }
 
   public String getString(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getStringValue();
+    return getField(columnIndex).getStringValue();
   }
 
   public LocalDate getDate(String columnName) {
@@ -119,7 +125,7 @@ public class ResultSet {
   }
 
   public LocalDate getDate(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getDateV();
+    return getField(columnIndex).getDateV();
   }
 
   public Binary getBinary(String columnName) {
@@ -128,7 +134,7 @@ public class ResultSet {
   }
 
   public Binary getBinary(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1).getBinaryV();
+    return getField(columnIndex).getBinaryV();
   }
 
   public boolean isNull(String columnName) {
@@ -137,7 +143,18 @@ public class ResultSet {
   }
 
   public boolean isNull(int columnIndex) {
-    return currentRow.getFields().get(columnIndex - 1) == null;
+    return getField(columnIndex) == null;
+  }
+
+  protected Field getField(int columnIndex) {
+    Field field;
+    if (columnIndex == 1) {
+      field = new Field(TSDataType.INT64);
+      field.setLongV(currentRow.getTimestamp());
+    } else {
+      field = currentRow.getField(columnIndex - 2);
+    }
+    return field;
   }
 
   public void close() {}
@@ -148,8 +165,14 @@ public class ResultSet {
     private List<TSDataType> dataTypeList;
 
     public ResultSetMetadata(List<Path> paths, List<TSDataType> dataTypeList) {
-      this.paths = paths;
-      this.dataTypeList = dataTypeList;
+      this.paths = new ArrayList<>(paths.size() + 1);
+      this.dataTypeList = new ArrayList<>(paths.size() + 1);
+      // add time column
+      this.paths.add(new Path("Time"));
+      this.dataTypeList.add(TSDataType.INT64);
+      // add other columns
+      this.paths.addAll(paths);
+      this.dataTypeList.addAll(dataTypeList);
     }
 
     // columnIndex starting from 1
@@ -160,6 +183,10 @@ public class ResultSet {
     // columnIndex starting from 1
     public TSDataType getColumnType(int columnIndex) {
       return dataTypeList.get(columnIndex - 1);
+    }
+
+    public int getColumnNum() {
+      return dataTypeList.size();
     }
   }
 }
