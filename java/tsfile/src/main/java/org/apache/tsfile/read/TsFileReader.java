@@ -100,7 +100,7 @@ public class TsFileReader implements AutoCloseable {
   public ResultSet query(List<String> pathList, long startTime, long endTime) throws IOException {
     QueryExpression queryExpression = QueryExpression.create();
     for (String path : pathList) {
-      queryExpression.addSelectedPath(new Path(path));
+      queryExpression.addSelectedPath(new Path(path, true));
     }
     queryExpression.setExpression(
         new GlobalTimeExpression(new TimeFilterOperators.TimeBetweenAnd(startTime, endTime)));

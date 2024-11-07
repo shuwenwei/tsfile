@@ -22,6 +22,7 @@ package org.apache.tsfile.read.query.executor;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.exception.filter.QueryFilterOptimizationException;
 import org.apache.tsfile.exception.write.NoMeasurementException;
+import org.apache.tsfile.file.metadata.AlignedChunkMetadata;
 import org.apache.tsfile.file.metadata.IChunkMetadata;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.common.TimeRange;
@@ -189,7 +190,19 @@ public class TsFileExecutor implements QueryExecutor {
           seriesReader =
               new FileSeriesReader(chunkLoader, chunkMetadataList, timeExpression.getFilter());
         }
-        dataTypes.add(chunkMetadataList.get(0).getDataType());
+
+        IChunkMetadata iChunkMetadata = chunkMetadataList.get(0);
+        TSDataType dataType;
+        if (iChunkMetadata instanceof AlignedChunkMetadata) {
+          dataType =
+              ((AlignedChunkMetadata) iChunkMetadata)
+                  .getValueChunkMetadataList()
+                  .get(0)
+                  .getDataType();
+        } else {
+          dataType = iChunkMetadata.getDataType();
+        }
+        dataTypes.add(dataType);
       }
       readersOfSelectedSeries.add(seriesReader);
     }

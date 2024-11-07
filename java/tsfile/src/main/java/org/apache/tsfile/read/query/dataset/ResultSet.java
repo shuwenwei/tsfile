@@ -161,23 +161,23 @@ public class ResultSet {
 
   public static class ResultSetMetadata {
 
-    private List<Path> paths;
+    private List<String> columnNameList;
     private List<TSDataType> dataTypeList;
 
     public ResultSetMetadata(List<Path> paths, List<TSDataType> dataTypeList) {
-      this.paths = new ArrayList<>(paths.size() + 1);
+      this.columnNameList = new ArrayList<>(paths.size() + 1);
       this.dataTypeList = new ArrayList<>(paths.size() + 1);
       // add time column
-      this.paths.add(new Path("Time"));
+      this.columnNameList.add("Time");
       this.dataTypeList.add(TSDataType.INT64);
       // add other columns
-      this.paths.addAll(paths);
+      paths.forEach(path -> columnNameList.add(path.getFullPath()));
       this.dataTypeList.addAll(dataTypeList);
     }
 
     // columnIndex starting from 1
     public String getColumnName(int columnIndex) {
-      return paths.get(columnIndex - 1).getFullPath();
+      return columnNameList.get(columnIndex - 1);
     }
 
     // columnIndex starting from 1
