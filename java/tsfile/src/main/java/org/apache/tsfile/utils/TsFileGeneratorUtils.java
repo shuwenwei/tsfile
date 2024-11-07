@@ -71,20 +71,20 @@ public class TsFileGeneratorUtils {
         switch (schema.getType()) {
           case INT64:
           case TIMESTAMP:
-            dPoint = new LongDataPoint(schema.getMeasurementId(), startValue);
+            dPoint = new LongDataPoint(schema.getMeasurementName(), startValue);
             break;
           case INT32:
           case DATE:
-            dPoint = new IntDataPoint(schema.getMeasurementId(), (int) startValue);
+            dPoint = new IntDataPoint(schema.getMeasurementName(), (int) startValue);
             break;
           case DOUBLE:
-            dPoint = new DoubleDataPoint(schema.getMeasurementId(), (double) startValue);
+            dPoint = new DoubleDataPoint(schema.getMeasurementName(), (double) startValue);
             break;
           case FLOAT:
-            dPoint = new FloatDataPoint(schema.getMeasurementId(), (float) startValue);
+            dPoint = new FloatDataPoint(schema.getMeasurementName(), (float) startValue);
             break;
           case BOOLEAN:
-            dPoint = new BooleanDataPoint(schema.getMeasurementId(), true);
+            dPoint = new BooleanDataPoint(schema.getMeasurementName(), true);
             break;
           case TEXT:
           case BLOB:
@@ -92,7 +92,7 @@ public class TsFileGeneratorUtils {
           default:
             dPoint =
                 new StringDataPoint(
-                    schema.getMeasurementId(),
+                    schema.getMeasurementName(),
                     new Binary(String.valueOf(startValue), TSFileConfig.STRING_CHARSET));
             break;
         }
@@ -380,7 +380,7 @@ public class TsFileGeneratorUtils {
           for (IMeasurementSchema schema : alignedMeasurementSchemas) {
             DataPoint dPoint =
                 new StringDataPoint(
-                    schema.getMeasurementId(), new Binary(value, TSFileConfig.STRING_CHARSET));
+                    schema.getMeasurementName(), new Binary(value, TSFileConfig.STRING_CHARSET));
             tsRecord.addTuple(dPoint);
           }
           // write
@@ -438,7 +438,7 @@ public class TsFileGeneratorUtils {
           for (IMeasurementSchema schema : measurementSchemas) {
             DataPoint dPoint =
                 new StringDataPoint(
-                    schema.getMeasurementId(), new Binary(value, TSFileConfig.STRING_CHARSET));
+                    schema.getMeasurementName(), new Binary(value, TSFileConfig.STRING_CHARSET));
             tsRecord.addTuple(dPoint);
           }
           // write

@@ -199,7 +199,7 @@ public class Tablet {
   private void constructMeasurementIndexMap() {
     int indexInSchema = 0;
     for (IMeasurementSchema schema : schemas) {
-      measurementIndex.put(schema.getMeasurementId(), indexInSchema);
+      measurementIndex.put(schema.getMeasurementName(), indexInSchema);
       indexInSchema++;
     }
   }

@@ -18,11 +18,21 @@
  */
 package org.apache.tsfile.write.record;
 
+import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.IDeviceID.Factory;
+import org.apache.tsfile.utils.Binary;
 import org.apache.tsfile.utils.StringContainer;
+import org.apache.tsfile.write.record.datapoint.BooleanDataPoint;
 import org.apache.tsfile.write.record.datapoint.DataPoint;
+import org.apache.tsfile.write.record.datapoint.DateDataPoint;
+import org.apache.tsfile.write.record.datapoint.DoubleDataPoint;
+import org.apache.tsfile.write.record.datapoint.FloatDataPoint;
+import org.apache.tsfile.write.record.datapoint.IntDataPoint;
+import org.apache.tsfile.write.record.datapoint.LongDataPoint;
+import org.apache.tsfile.write.record.datapoint.StringDataPoint;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +79,39 @@ public class TSRecord {
   public TSRecord addTuple(DataPoint tuple) {
     this.dataPointList.add(tuple);
     return this;
+  }
+
+  public TSRecord addPoint(String measurementName, int val) {
+    return addTuple(new IntDataPoint(measurementName, val));
+  }
+
+  public TSRecord addPoint(String measurementName, long val) {
+    return addTuple(new LongDataPoint(measurementName, val));
+  }
+
+  public TSRecord addPoint(String measurementName, float val) {
+    return addTuple(new FloatDataPoint(measurementName, val));
+  }
+
+  public TSRecord addPoint(String measurementName, double val) {
+    return addTuple(new DoubleDataPoint(measurementName, val));
+  }
+
+  public TSRecord addPoint(String measurementName, boolean val) {
+    return addTuple(new BooleanDataPoint(measurementName, val));
+  }
+
+  public TSRecord addPoint(String measurementName, String val) {
+    return addTuple(
+        new StringDataPoint(measurementName, new Binary(val, TSFileConfig.STRING_CHARSET)));
+  }
+
+  public TSRecord addPoint(String measurementName, byte[] val) {
+    return addTuple(new StringDataPoint(measurementName, new Binary(val)));
+  }
+
+  public TSRecord addPoint(String measurementName, LocalDate val) {
+    return addTuple(new DateDataPoint(measurementName, val));
   }
 
   /**

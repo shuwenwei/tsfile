@@ -490,7 +490,7 @@ public class TsFileWriteApiTest {
       QueryExpression queryExpression =
           QueryExpression.create(
               Collections.singletonList(
-                  new Path(deviceId, alignedMeasurementSchemas.get(i).getMeasurementId(), true)),
+                  new Path(deviceId, alignedMeasurementSchemas.get(i).getMeasurementName(), true)),
               null);
       QueryDataSet queryDataSet = tsFileReader.query(queryExpression);
 
@@ -536,7 +536,7 @@ public class TsFileWriteApiTest {
       QueryExpression queryExpression =
           QueryExpression.create(
               Collections.singletonList(
-                  new Path(deviceId, alignedMeasurementSchemas.get(i).getMeasurementId(), true)),
+                  new Path(deviceId, alignedMeasurementSchemas.get(i).getMeasurementName(), true)),
               null);
       QueryDataSet queryDataSet = tsFileReader.query(queryExpression);
       int cnt = 0;
@@ -602,7 +602,7 @@ public class TsFileWriteApiTest {
       QueryExpression queryExpression =
           QueryExpression.create(
               Collections.singletonList(
-                  new Path(deviceId, alignedMeasurementSchemas.get(i).getMeasurementId(), true)),
+                  new Path(deviceId, alignedMeasurementSchemas.get(i).getMeasurementName(), true)),
               null);
       QueryDataSet queryDataSet = tsFileReader.query(queryExpression);
       int cnt = 0;
@@ -687,7 +687,7 @@ public class TsFileWriteApiTest {
       QueryExpression queryExpression =
           QueryExpression.create(
               Collections.singletonList(
-                  new Path(deviceId, measurementSchemas.get(0).getMeasurementId(), true)),
+                  new Path(deviceId, measurementSchemas.get(0).getMeasurementName(), true)),
               null);
       QueryDataSet queryDataSet = tsFileReader.query(queryExpression);
       int cnt = 0;

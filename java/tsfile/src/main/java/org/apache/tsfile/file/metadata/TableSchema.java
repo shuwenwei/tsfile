@@ -90,7 +90,7 @@ public class TableSchema {
             columnName,
             colName -> {
               for (int i = 0; i < columnSchemas.size(); i++) {
-                if (columnSchemas.get(i).getMeasurementId().equals(columnName)) {
+                if (columnSchemas.get(i).getMeasurementName().equals(columnName)) {
                   return i;
                 }
               }
@@ -109,7 +109,7 @@ public class TableSchema {
             colName -> {
               int columnOrder = 0;
               for (int i = 0; i < columnSchemas.size(); i++) {
-                if (columnSchemas.get(i).getMeasurementId().equals(columnName)
+                if (columnSchemas.get(i).getMeasurementName().equals(columnName)
                     && columnCategories.get(i) == ColumnCategory.ID) {
                   return columnOrder;
                 } else if (columnCategories.get(i) == ColumnCategory.ID) {

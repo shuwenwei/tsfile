@@ -34,7 +34,7 @@ import java.util.Map;
 public class VectorMeasurementSchemaStub extends VectorMeasurementSchema {
 
   @Override
-  public String getMeasurementId() {
+  public String getMeasurementName() {
     return "";
   }
 

@@ -115,7 +115,7 @@ public class VectorMeasurementSchema
   }
 
   @Override
-  public String getMeasurementId() {
+  public String getMeasurementName() {
     return deviceId;
   }
 

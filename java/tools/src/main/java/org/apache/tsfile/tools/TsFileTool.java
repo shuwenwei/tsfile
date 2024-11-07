@@ -214,18 +214,18 @@ public class TsFileTool {
         List<IMeasurementSchema> columnSchemas = tableSchema.getColumnSchemas();
         for (int j = 0; j < columnSchemas.size(); j++) {
           IMeasurementSchema columnSchema = columnSchemas.get(j);
-          if (defaultMap.get(columnSchema.getMeasurementId()) != null) {
+          if (defaultMap.get(columnSchema.getMeasurementName()) != null) {
             tablet.addValue(
-                columnSchema.getMeasurementId(),
+                columnSchema.getMeasurementName(),
                 i,
-                defaultMap.get(columnSchema.getMeasurementId()));
+                defaultMap.get(columnSchema.getMeasurementName()));
           } else {
-            String value = lineArray[map.get(columnSchema.getMeasurementId())];
+            String value = lineArray[map.get(columnSchema.getMeasurementName())];
             if (value.equals(schema.nullFormat)) {
               value = null;
             }
             tablet.addValue(
-                columnSchema.getMeasurementId(),
+                columnSchema.getMeasurementName(),
                 i,
                 getValue(columnSchema.getType(), value, tableSchema.getColumnTypes().get(j)));
           }

@@ -102,20 +102,20 @@ public class TabletTest {
     tablet.initBitMaps();
     for (int i = 0; i < rowSize - 1; i++) {
       tablet.addTimestamp(i, i);
-      tablet.addValue(measurementSchemas.get(0).getMeasurementId(), i, i);
-      tablet.addValue(measurementSchemas.get(1).getMeasurementId(), i, (long) i);
-      tablet.addValue(measurementSchemas.get(2).getMeasurementId(), i, (float) i);
-      tablet.addValue(measurementSchemas.get(3).getMeasurementId(), i, (double) i);
-      tablet.addValue(measurementSchemas.get(4).getMeasurementId(), i, (i % 2) == 0);
-      tablet.addValue(measurementSchemas.get(5).getMeasurementId(), i, String.valueOf(i));
-      tablet.addValue(measurementSchemas.get(6).getMeasurementId(), i, String.valueOf(i));
+      tablet.addValue(measurementSchemas.get(0).getMeasurementName(), i, i);
+      tablet.addValue(measurementSchemas.get(1).getMeasurementName(), i, (long) i);
+      tablet.addValue(measurementSchemas.get(2).getMeasurementName(), i, (float) i);
+      tablet.addValue(measurementSchemas.get(3).getMeasurementName(), i, (double) i);
+      tablet.addValue(measurementSchemas.get(4).getMeasurementName(), i, (i % 2) == 0);
+      tablet.addValue(measurementSchemas.get(5).getMeasurementName(), i, String.valueOf(i));
+      tablet.addValue(measurementSchemas.get(6).getMeasurementName(), i, String.valueOf(i));
       tablet.addValue(
-          measurementSchemas.get(7).getMeasurementId(),
+          measurementSchemas.get(7).getMeasurementName(),
           i,
           new Binary(String.valueOf(i), TSFileConfig.STRING_CHARSET));
-      tablet.addValue(measurementSchemas.get(8).getMeasurementId(), i, (long) i);
+      tablet.addValue(measurementSchemas.get(8).getMeasurementName(), i, (long) i);
       tablet.addValue(
-          measurementSchemas.get(9).getMeasurementId(),
+          measurementSchemas.get(9).getMeasurementName(),
           i,
           LocalDate.of(2000 + i, i / 100 + 1, i / 100 + 1));
 
@@ -124,16 +124,16 @@ public class TabletTest {
 
     // Test add null
     tablet.addTimestamp(rowSize - 1, rowSize - 1);
-    tablet.addValue(measurementSchemas.get(0).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(1).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(2).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(3).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(4).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(5).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(6).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(7).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(8).getMeasurementId(), rowSize - 1, null);
-    tablet.addValue(measurementSchemas.get(9).getMeasurementId(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(0).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(1).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(2).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(3).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(4).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(5).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(6).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(7).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(8).getMeasurementName(), rowSize - 1, null);
+    tablet.addValue(measurementSchemas.get(9).getMeasurementName(), rowSize - 1, null);
 
     try {
       final ByteBuffer byteBuffer = tablet.serialize();
@@ -171,16 +171,16 @@ public class TabletTest {
     tablet.initBitMaps();
     for (int i = 0; i < rowSize; i++) {
       tablet.addTimestamp(i, i);
-      tablet.addValue(measurementSchemas.get(0).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(1).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(2).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(3).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(4).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(5).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(6).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(7).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(8).getMeasurementId(), i, null);
-      tablet.addValue(measurementSchemas.get(9).getMeasurementId(), i, null);
+      tablet.addValue(measurementSchemas.get(0).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(1).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(2).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(3).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(4).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(5).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(6).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(7).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(8).getMeasurementName(), i, null);
+      tablet.addValue(measurementSchemas.get(9).getMeasurementName(), i, null);
     }
 
     try {

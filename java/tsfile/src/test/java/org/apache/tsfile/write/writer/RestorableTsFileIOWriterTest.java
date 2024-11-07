@@ -136,7 +136,7 @@ public class RestorableTsFileIOWriterTest {
     writer
         .getIOWriter()
         .startFlushChunk(
-            new MeasurementSchema("s1", TSDataType.FLOAT, TSEncoding.PLAIN).getMeasurementId(),
+            new MeasurementSchema("s1", TSDataType.FLOAT, TSEncoding.PLAIN).getMeasurementName(),
             CompressionType.SNAPPY,
             TSDataType.FLOAT,
             TSEncoding.PLAIN,

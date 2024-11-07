@@ -100,16 +100,16 @@ public class AlignedChunkGroupWriterImpl implements IChunkGroupWriter {
   public ValueChunkWriter tryToAddSeriesWriterInternal(IMeasurementSchema measurementSchema)
       throws IOException {
     ValueChunkWriter valueChunkWriter =
-        valueChunkWriterMap.get(measurementSchema.getMeasurementId());
+        valueChunkWriterMap.get(measurementSchema.getMeasurementName());
     if (valueChunkWriter == null) {
       valueChunkWriter =
           new ValueChunkWriter(
-              measurementSchema.getMeasurementId(),
+              measurementSchema.getMeasurementName(),
               measurementSchema.getCompressor(),
               measurementSchema.getType(),
               measurementSchema.getEncodingType(),
               measurementSchema.getValueEncoder());
-      valueChunkWriterMap.put(measurementSchema.getMeasurementId(), valueChunkWriter);
+      valueChunkWriterMap.put(measurementSchema.getMeasurementName(), valueChunkWriter);
       tryToAddEmptyPageAndData(valueChunkWriter);
     }
     return valueChunkWriter;
@@ -118,15 +118,15 @@ public class AlignedChunkGroupWriterImpl implements IChunkGroupWriter {
   @Override
   public void tryToAddSeriesWriter(List<IMeasurementSchema> measurementSchemas) throws IOException {
     for (IMeasurementSchema schema : measurementSchemas) {
-      if (!valueChunkWriterMap.containsKey(schema.getMeasurementId())) {
+      if (!valueChunkWriterMap.containsKey(schema.getMeasurementName())) {
         ValueChunkWriter valueChunkWriter =
             new ValueChunkWriter(
-                schema.getMeasurementId(),
+                schema.getMeasurementName(),
                 schema.getCompressor(),
                 schema.getType(),
                 schema.getEncodingType(),
                 schema.getValueEncoder());
-        valueChunkWriterMap.put(schema.getMeasurementId(), valueChunkWriter);
+        valueChunkWriterMap.put(schema.getMeasurementName(), valueChunkWriter);
         tryToAddEmptyPageAndData(valueChunkWriter);
       }
     }
@@ -199,7 +199,7 @@ public class AlignedChunkGroupWriterImpl implements IChunkGroupWriter {
     // TODO: should we allow duplicated measurements in a Tablet?
     Set<String> existingMeasurements =
         measurementSchemas.stream()
-            .map(IMeasurementSchema::getMeasurementId)
+            .map(IMeasurementSchema::getMeasurementName)
             .collect(Collectors.toSet());
     for (Map.Entry<String, ValueChunkWriter> entry : valueChunkWriterMap.entrySet()) {
       if (!existingMeasurements.contains(entry.getKey())) {

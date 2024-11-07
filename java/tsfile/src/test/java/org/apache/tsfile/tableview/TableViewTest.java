@@ -165,7 +165,7 @@ public class TableViewTest {
 
     final List<String> columns =
         tableSchema.getColumnSchemas().stream()
-            .map(IMeasurementSchema::getMeasurementId)
+            .map(IMeasurementSchema::getMeasurementName)
             .collect(Collectors.toList());
     int cnt;
     try (TsBlockReader reader =
@@ -242,7 +242,7 @@ public class TableViewTest {
             TableQueryOrdering.DEVICE);
     final List<String> columns =
         tableSchema.getColumnSchemas().stream()
-            .map(IMeasurementSchema::getMeasurementId)
+            .map(IMeasurementSchema::getMeasurementName)
             .collect(Collectors.toList());
     int cnt;
     try (TsBlockReader reader =
@@ -292,7 +292,7 @@ public class TableViewTest {
 
     final List<String> columns =
         testTableSchema.getColumnSchemas().stream()
-            .map(IMeasurementSchema::getMeasurementId)
+            .map(IMeasurementSchema::getMeasurementName)
             .collect(Collectors.toList());
 
     for (int i = 0; i < tableNum; i++) {
@@ -395,7 +395,7 @@ public class TableViewTest {
 
       List<String> columns =
           testTableSchema.getColumnSchemas().stream()
-              .map(IMeasurementSchema::getMeasurementId)
+              .map(IMeasurementSchema::getMeasurementName)
               .collect(Collectors.toList());
       TsBlockReader reader =
           tableQueryExecutor.query(testTableSchema.getTableName(), columns, null, null, null);
@@ -441,7 +441,7 @@ public class TableViewTest {
 
       List<String> columns =
           treeSchemas.stream()
-              .map(IMeasurementSchema::getMeasurementId)
+              .map(IMeasurementSchema::getMeasurementName)
               .collect(Collectors.toList());
       TsBlockReader reader =
           tableQueryExecutor.query(deviceID.getTableName(), columns, null, null, null);
@@ -501,7 +501,7 @@ public class TableViewTest {
         for (int j = 0; j < columnSchemas.size(); j++) {
           IMeasurementSchema columnSchema = columnSchemas.get(j);
           tablet.addValue(
-              columnSchema.getMeasurementId(), rowIndex, getValue(columnSchema.getType(), i));
+              columnSchema.getMeasurementName(), rowIndex, getValue(columnSchema.getType(), i));
         }
       }
     }

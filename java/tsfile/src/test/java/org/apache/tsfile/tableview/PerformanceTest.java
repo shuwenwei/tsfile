@@ -237,7 +237,7 @@ public class PerformanceTest {
 
       List<String> columns =
           measurementSchemas.stream()
-              .map(IMeasurementSchema::getMeasurementId)
+              .map(IMeasurementSchema::getMeasurementName)
               .collect(Collectors.toList());
       TsBlockReader reader =
           tableQueryExecutor.query(genTableName(tableCnt / 2), columns, null, null, null);

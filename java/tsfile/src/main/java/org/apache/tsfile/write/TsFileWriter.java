@@ -249,6 +249,11 @@ public class TsFileWriter implements AutoCloseable {
     getSchema().registerDevice(deviceID, templateName);
   }
 
+  public void registerTimeseries(String deviceId, IMeasurementSchema measurementSchema)
+      throws WriteProcessException {
+    registerTimeseries(IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId), measurementSchema);
+  }
+
   @Deprecated
   public void registerTimeseries(Path devicePath, IMeasurementSchema measurementSchema)
       throws WriteProcessException {
@@ -266,10 +271,10 @@ public class TsFileWriter implements AutoCloseable {
             "given device " + deviceID + " has been registered for aligned timeseries.");
       } else if (measurementGroup
           .getMeasurementSchemaMap()
-          .containsKey(measurementSchema.getMeasurementId())) {
+          .containsKey(measurementSchema.getMeasurementName())) {
         throw new WriteProcessException(
             "given nonAligned timeseries "
-                + (deviceID + "." + measurementSchema.getMeasurementId())
+                + (deviceID + "." + measurementSchema.getMeasurementName())
                 + " has been registered.");
       }
     } else {
@@ -277,7 +282,7 @@ public class TsFileWriter implements AutoCloseable {
     }
     measurementGroup
         .getMeasurementSchemaMap()
-        .put(measurementSchema.getMeasurementId(), measurementSchema);
+        .put(measurementSchema.getMeasurementName(), measurementSchema);
     getSchema().registerMeasurementGroup(deviceID, measurementGroup);
   }
 
@@ -291,6 +296,12 @@ public class TsFileWriter implements AutoCloseable {
         LOG.warn(e.getMessage());
       }
     }
+  }
+
+  public void registerAlignedTimeseries(
+      String deviceId, List<IMeasurementSchema> measurementSchemas) throws WriteProcessException {
+    registerAlignedTimeseries(
+        IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId), measurementSchemas);
   }
 
   public void registerAlignedTimeseries(
@@ -321,7 +332,7 @@ public class TsFileWriter implements AutoCloseable {
         measurementSchema -> {
           measurementGroup
               .getMeasurementSchemaMap()
-              .put(measurementSchema.getMeasurementId(), measurementSchema);
+              .put(measurementSchema.getMeasurementName(), measurementSchema);
         });
     getSchema().registerMeasurementGroup(deviceID, measurementGroup);
   }
@@ -341,10 +352,10 @@ public class TsFileWriter implements AutoCloseable {
       if (isAligned) {
         for (IMeasurementSchema s : measurementSchemas) {
           if (flushedMeasurementsInDeviceMap.containsKey(deviceID)
-              && !flushedMeasurementsInDeviceMap.get(deviceID).contains(s.getMeasurementId())) {
+              && !flushedMeasurementsInDeviceMap.get(deviceID).contains(s.getMeasurementName())) {
             throw new WriteProcessException(
                 "TsFile has flushed chunk group and should not add new measurement "
-                    + s.getMeasurementId()
+                    + s.getMeasurementName()
                     + " in device "
                     + deviceID);
           }
@@ -373,9 +384,9 @@ public class TsFileWriter implements AutoCloseable {
     }
 
     for (IMeasurementSchema writingColumnSchema : tablet.getSchemas()) {
-      final int columnIndex = tableSchema.findColumnIndex(writingColumnSchema.getMeasurementId());
+      final int columnIndex = tableSchema.findColumnIndex(writingColumnSchema.getMeasurementName());
       if (columnIndex < 0) {
-        throw new NoMeasurementException(writingColumnSchema.getMeasurementId());
+        throw new NoMeasurementException(writingColumnSchema.getMeasurementName());
       }
       final IMeasurementSchema registeredColumnSchema =
           tableSchema.getColumnSchemas().get(columnIndex);
@@ -397,10 +408,10 @@ public class TsFileWriter implements AutoCloseable {
       if (isAligned) {
         for (IMeasurementSchema s : schemas) {
           if (flushedMeasurementsInDeviceMap.containsKey(deviceID)
-              && !flushedMeasurementsInDeviceMap.get(deviceID).contains(s.getMeasurementId())) {
+              && !flushedMeasurementsInDeviceMap.get(deviceID).contains(s.getMeasurementName())) {
             throw new WriteProcessException(
                 "TsFile has flushed chunk group and should not add new measurement "
-                    + s.getMeasurementId()
+                    + s.getMeasurementName()
                     + " in device "
                     + deviceID);
           }
@@ -436,9 +447,9 @@ public class TsFileWriter implements AutoCloseable {
     for (IMeasurementSchema measurementSchema : measurementSchemas) {
       if (!measurementGroup
           .getMeasurementSchemaMap()
-          .containsKey(measurementSchema.getMeasurementId())) {
+          .containsKey(measurementSchema.getMeasurementName())) {
         if (isAligned) {
-          throw new NoMeasurementException(measurementSchema.getMeasurementId());
+          throw new NoMeasurementException(measurementSchema.getMeasurementName());
         } else {
           measurementSchemas.remove(measurementSchema);
         }

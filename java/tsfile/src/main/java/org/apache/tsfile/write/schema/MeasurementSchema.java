@@ -46,7 +46,7 @@ import java.util.Objects;
 public class MeasurementSchema
     implements IMeasurementSchema, Comparable<MeasurementSchema>, Serializable {
 
-  private String measurementId;
+  private String measurementName;
   private TSDataType dataType;
   private TSEncoding encoding;
   private CompressionType compressionType;
@@ -55,9 +55,9 @@ public class MeasurementSchema
 
   public MeasurementSchema() {}
 
-  public MeasurementSchema(String measurementId, TSDataType dataType) {
+  public MeasurementSchema(String measurementName, TSDataType dataType) {
     this(
-        measurementId,
+        measurementName,
         dataType,
         TSEncoding.valueOf(TSFileDescriptor.getInstance().getConfig().getValueEncoder()),
         TSFileDescriptor.getInstance().getConfig().getCompressor(),
@@ -65,9 +65,9 @@ public class MeasurementSchema
   }
 
   /** set properties as an empty Map. */
-  public MeasurementSchema(String measurementId, TSDataType dataType, TSEncoding encoding) {
+  public MeasurementSchema(String measurementName, TSDataType dataType, TSEncoding encoding) {
     this(
-        measurementId,
+        measurementName,
         dataType,
         encoding,
         TSFileDescriptor.getInstance().getConfig().getCompressor(),
@@ -75,11 +75,11 @@ public class MeasurementSchema
   }
 
   public MeasurementSchema(
-      String measurementId,
+      String measurementName,
       TSDataType dataType,
       TSEncoding encoding,
       CompressionType compressionType) {
-    this(measurementId, dataType, encoding, compressionType, null);
+    this(measurementName, dataType, encoding, compressionType, null);
   }
 
   /**
@@ -89,22 +89,26 @@ public class MeasurementSchema
    * Encoder.maxStringLength
    */
   public MeasurementSchema(
-      String measurementId,
+      String measurementName,
       TSDataType dataType,
       TSEncoding encoding,
       CompressionType compressionType,
       Map<String, String> props) {
     this.dataType = dataType;
-    this.measurementId = measurementId;
+    this.measurementName = measurementName;
     this.encoding = encoding;
     this.props = props;
     this.compressionType = compressionType;
   }
 
   public MeasurementSchema(
-      String measurementId, byte type, byte encoding, byte compressor, Map<String, String> props) {
+      String measurementName,
+      byte type,
+      byte encoding,
+      byte compressor,
+      Map<String, String> props) {
     this.dataType = TSDataType.getTsDataType(type);
-    this.measurementId = measurementId;
+    this.measurementName = measurementName;
     this.encoding = TSEncoding.deserialize(encoding);
     this.props = props;
     this.compressionType = CompressionType.deserialize(compressor);
@@ -114,7 +118,7 @@ public class MeasurementSchema
   public static MeasurementSchema deserializeFrom(InputStream inputStream) throws IOException {
     MeasurementSchema measurementSchema = new MeasurementSchema();
 
-    measurementSchema.measurementId = ReadWriteIOUtils.readString(inputStream);
+    measurementSchema.measurementName = ReadWriteIOUtils.readString(inputStream);
 
     measurementSchema.dataType = TSDataType.deserializeFrom(inputStream);
 
@@ -142,7 +146,7 @@ public class MeasurementSchema
   public static MeasurementSchema deserializeFrom(ByteBuffer buffer) {
     MeasurementSchema measurementSchema = new MeasurementSchema();
 
-    measurementSchema.measurementId = ReadWriteIOUtils.readString(buffer);
+    measurementSchema.measurementName = ReadWriteIOUtils.readString(buffer);
 
     measurementSchema.dataType = TSDataType.deserializeFrom(buffer);
 
@@ -169,7 +173,7 @@ public class MeasurementSchema
   public static MeasurementSchema partialDeserializeFrom(ByteBuffer buffer) {
     MeasurementSchema measurementSchema = new MeasurementSchema();
 
-    measurementSchema.measurementId = ReadWriteIOUtils.readString(buffer);
+    measurementSchema.measurementName = ReadWriteIOUtils.readString(buffer);
 
     measurementSchema.dataType = TSDataType.deserializeFrom(buffer);
 
@@ -187,12 +191,12 @@ public class MeasurementSchema
   }
 
   @Override
-  public String getMeasurementId() {
-    return measurementId;
+  public String getMeasurementName() {
+    return measurementName;
   }
 
-  public void setMeasurementId(String measurementId) {
-    this.measurementId = measurementId;
+  public void setMeasurementName(String measurementName) {
+    this.measurementName = measurementName;
   }
 
   @Override
@@ -278,7 +282,7 @@ public class MeasurementSchema
   public int serializeTo(OutputStream outputStream) throws IOException {
     int byteLen = 0;
 
-    byteLen += ReadWriteIOUtils.write(measurementId, outputStream);
+    byteLen += ReadWriteIOUtils.write(measurementName, outputStream);
 
     byteLen += ReadWriteIOUtils.write(dataType.serialize(), outputStream);
 
@@ -302,7 +306,7 @@ public class MeasurementSchema
   @Override
   public int serializedSize() {
     int byteLen = 0;
-    byteLen += ReadWriteIOUtils.sizeToWrite(measurementId);
+    byteLen += ReadWriteIOUtils.sizeToWrite(measurementName);
     byteLen += 3 * Byte.BYTES;
     if (props == null) {
       byteLen += Integer.BYTES;
@@ -322,7 +326,7 @@ public class MeasurementSchema
   public int serializeTo(ByteBuffer buffer) {
     int byteLen = 0;
 
-    byteLen += ReadWriteIOUtils.write(measurementId, buffer);
+    byteLen += ReadWriteIOUtils.write(measurementName, buffer);
 
     byteLen += ReadWriteIOUtils.write(dataType.serialize(), buffer);
 
@@ -348,7 +352,7 @@ public class MeasurementSchema
     int byteLen = 0;
 
     byteLen += ReadWriteIOUtils.write((byte) 0, outputStream);
-    byteLen += ReadWriteIOUtils.write(measurementId, outputStream);
+    byteLen += ReadWriteIOUtils.write(measurementName, outputStream);
     byteLen += ReadWriteIOUtils.write(dataType.serialize(), outputStream);
     byteLen += ReadWriteIOUtils.write(encoding, outputStream);
     byteLen += ReadWriteIOUtils.write(compressionType.serialize(), outputStream);
@@ -366,7 +370,7 @@ public class MeasurementSchema
     int byteLen = 0;
 
     byteLen += ReadWriteIOUtils.write((byte) 0, buffer);
-    byteLen += ReadWriteIOUtils.write(measurementId, buffer);
+    byteLen += ReadWriteIOUtils.write(measurementName, buffer);
     byteLen += ReadWriteIOUtils.write(dataType.serialize(), buffer);
     byteLen += ReadWriteIOUtils.write(encoding, buffer);
     byteLen += ReadWriteIOUtils.write(compressionType.serialize(), buffer);
@@ -385,13 +389,13 @@ public class MeasurementSchema
     MeasurementSchema that = (MeasurementSchema) o;
     return dataType == that.dataType
         && encoding == that.encoding
-        && Objects.equals(measurementId, that.measurementId)
+        && Objects.equals(measurementName, that.measurementName)
         && compressionType == that.compressionType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataType, encoding, measurementId, compressionType);
+    return Objects.hash(dataType, encoding, measurementName, compressionType);
   }
 
   /** compare by measurementID. */
@@ -400,7 +404,7 @@ public class MeasurementSchema
     if (equals(o)) {
       return 0;
     } else {
-      return this.measurementId.compareTo(o.measurementId);
+      return this.measurementName.compareTo(o.measurementName);
     }
   }
 
@@ -409,7 +413,7 @@ public class MeasurementSchema
     StringContainer sc = new StringContainer("");
     sc.addTail(
         "[",
-        measurementId,
+        measurementName,
         ",",
         dataType.toString(),
         ",",
@@ -428,7 +432,7 @@ public class MeasurementSchema
 
   @Override
   public int getSubMeasurementIndex(String measurementId) {
-    return this.measurementId.equals(measurementId) ? 0 : -1;
+    return this.measurementName.equals(measurementId) ? 0 : -1;
   }
 
   @Override
@@ -438,7 +442,7 @@ public class MeasurementSchema
 
   @Override
   public boolean containsSubMeasurement(String measurementId) {
-    return this.measurementId.equals(measurementId);
+    return this.measurementName.equals(measurementId);
   }
 
   public void setEncoding(TSEncoding encoding) {

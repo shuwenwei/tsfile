@@ -70,16 +70,17 @@ public class NonAlignedChunkGroupWriterImpl implements IChunkGroupWriter {
 
   @Override
   public void tryToAddSeriesWriter(IMeasurementSchema schema) {
-    if (!chunkWriters.containsKey(schema.getMeasurementId())) {
-      this.chunkWriters.put(schema.getMeasurementId(), new ChunkWriterImpl(schema, encryptParam));
+    if (!chunkWriters.containsKey(schema.getMeasurementName())) {
+      this.chunkWriters.put(schema.getMeasurementName(), new ChunkWriterImpl(schema, encryptParam));
     }
   }
 
   @Override
   public void tryToAddSeriesWriter(List<IMeasurementSchema> schemas) {
     for (IMeasurementSchema schema : schemas) {
-      if (!chunkWriters.containsKey(schema.getMeasurementId())) {
-        this.chunkWriters.put(schema.getMeasurementId(), new ChunkWriterImpl(schema, encryptParam));
+      if (!chunkWriters.containsKey(schema.getMeasurementName())) {
+        this.chunkWriters.put(
+            schema.getMeasurementName(), new ChunkWriterImpl(schema, encryptParam));
       }
     }
   }
@@ -115,7 +116,7 @@ public class NonAlignedChunkGroupWriterImpl implements IChunkGroupWriter {
           && tablet.getColumnTypes().get(column) != ColumnCategory.MEASUREMENT) {
         continue;
       }
-      String measurementId = timeseries.get(column).getMeasurementId();
+      String measurementId = timeseries.get(column).getMeasurementName();
       TSDataType tsDataType = timeseries.get(column).getType();
       pointCount = 0;
       for (int row = startRowIndex; row < endRowIndex; row++) {
