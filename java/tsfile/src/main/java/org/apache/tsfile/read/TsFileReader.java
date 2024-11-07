@@ -23,12 +23,16 @@ import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
 import org.apache.tsfile.file.metadata.TsFileMetadata;
+import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
 import org.apache.tsfile.read.controller.IChunkLoader;
 import org.apache.tsfile.read.controller.IMetadataQuerier;
 import org.apache.tsfile.read.controller.MetadataQuerierByFileImpl;
 import org.apache.tsfile.read.expression.QueryExpression;
+import org.apache.tsfile.read.expression.impl.GlobalTimeExpression;
+import org.apache.tsfile.read.filter.operator.TimeFilterOperators;
 import org.apache.tsfile.read.query.dataset.QueryDataSet;
+import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.read.query.executor.TsFileExecutor;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 
@@ -91,6 +95,16 @@ public class TsFileReader implements AutoCloseable {
 
   public QueryDataSet query(QueryExpression queryExpression) throws IOException {
     return tsFileExecutor.execute(queryExpression);
+  }
+
+  public ResultSet query(List<String> pathList, long startTime, long endTime) throws IOException {
+    QueryExpression queryExpression = QueryExpression.create();
+    for (String path : pathList) {
+      queryExpression.addSelectedPath(new Path(path));
+    }
+    queryExpression.setExpression(
+        new GlobalTimeExpression(new TimeFilterOperators.TimeBetweenAnd(startTime, endTime)));
+    return new ResultSet(tsFileExecutor.execute(queryExpression));
   }
 
   public QueryDataSet query(
