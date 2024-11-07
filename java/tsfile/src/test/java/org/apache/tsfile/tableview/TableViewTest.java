@@ -341,7 +341,7 @@ public class TableViewTest {
     writer.writeTable(tablet);
     // tree-view write
     for (int i = 0; i < 50; i++) {
-      final TSRecord tsRecord = new TSRecord(i, deviceID);
+      final TSRecord tsRecord = new TSRecord(deviceID, i);
       for (int j = 0; j < measurementSchemaNum; j++) {
         tsRecord.addTuple(new LongDataPoint("s" + j, i));
       }
@@ -380,7 +380,7 @@ public class TableViewTest {
     writer.writeTable(tablet);
     // tree-view write
     for (int i = 0; i < 50; i++) {
-      final TSRecord tsRecord = new TSRecord(i, deviceID);
+      final TSRecord tsRecord = new TSRecord(deviceID, i);
       for (int j = 0; j < measurementSchemaNum; j++) {
         tsRecord.addTuple(new LongDataPoint("s" + j, i));
       }

@@ -131,17 +131,17 @@ public class TimeGeneratorReadWriteTest {
     tsFileWriter.registerTimeseries(d1, new MeasurementSchema("s2", TSDataType.INT32));
 
     // s1 -> 1, 2, 3
-    TSRecord tsRecord = new TSRecord(1, "d1");
+    TSRecord tsRecord = new TSRecord("d1", 1);
     DataPoint dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
     tsFileWriter.writeRecord(tsRecord);
 
-    tsRecord = new TSRecord(2, "d1");
+    tsRecord = new TSRecord("d1", 2);
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
     tsFileWriter.writeRecord(tsRecord);
 
-    tsRecord = new TSRecord(3, "d1");
+    tsRecord = new TSRecord("d1", 3);
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
     tsFileWriter.writeRecord(tsRecord);
@@ -149,17 +149,17 @@ public class TimeGeneratorReadWriteTest {
     tsFileWriter.flush();
 
     // s2 -> 2, 3, 4
-    tsRecord = new TSRecord(2, "d1");
+    tsRecord = new TSRecord("d1", 2);
     DataPoint dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
     tsFileWriter.writeRecord(tsRecord);
 
-    tsRecord = new TSRecord(3, "d1");
+    tsRecord = new TSRecord("d1", 3);
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
     tsFileWriter.writeRecord(tsRecord);
 
-    tsRecord = new TSRecord(4, "d1");
+    tsRecord = new TSRecord("d1", 4);
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
     tsFileWriter.writeRecord(tsRecord);
@@ -167,12 +167,12 @@ public class TimeGeneratorReadWriteTest {
     tsFileWriter.flush();
 
     // s1 -> 4, 5
-    tsRecord = new TSRecord(4, "d1");
+    tsRecord = new TSRecord("d1", 4);
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
     tsFileWriter.writeRecord(tsRecord);
 
-    tsRecord = new TSRecord(5, "d1");
+    tsRecord = new TSRecord("d1", 5);
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
     tsFileWriter.writeRecord(tsRecord);
@@ -180,12 +180,12 @@ public class TimeGeneratorReadWriteTest {
     tsFileWriter.flush();
 
     // s2 -> 5, 6
-    tsRecord = new TSRecord(5, "d1");
+    tsRecord = new TSRecord("d1", 5);
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
     tsFileWriter.writeRecord(tsRecord);
 
-    tsRecord = new TSRecord(6, "d1");
+    tsRecord = new TSRecord("d1", 6);
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
     tsFileWriter.writeRecord(tsRecord);

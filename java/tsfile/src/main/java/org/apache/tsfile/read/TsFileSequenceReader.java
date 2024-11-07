@@ -857,7 +857,7 @@ public class TsFileSequenceReader implements AutoCloseable {
     return deviceIDS;
   }
 
-  private List<IDeviceID> getAllDevices(MetadataIndexNode metadataIndexNode) throws IOException {
+  public List<IDeviceID> getAllDevices(MetadataIndexNode metadataIndexNode) throws IOException {
     List<IDeviceID> deviceList = new ArrayList<>();
     // if metadataIndexNode is LEAF_DEVICE, put all devices in node entry into the list
     if (metadataIndexNode.getNodeType().equals(MetadataIndexNodeType.LEAF_DEVICE)) {

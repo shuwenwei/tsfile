@@ -156,7 +156,7 @@ public class TsFileSequenceReaderTest {
     try (TsFileWriter writer = new TsFileWriter(testFile)) {
       IDeviceID deviceID = Factory.DEFAULT_FACTORY.create("root.topic1");
       writer.registerTimeseries(deviceID, new MeasurementSchema("s", TSDataType.DOUBLE));
-      TSRecord record = new TSRecord(0, deviceID);
+      TSRecord record = new TSRecord(deviceID, 0);
       record.addTuple(new DoubleDataPoint("s", 0.0));
       writer.writeRecord(record);
     }
@@ -174,7 +174,7 @@ public class TsFileSequenceReaderTest {
     IDeviceID deviceID = Factory.DEFAULT_FACTORY.create("root.topic1");
     try (TsFileWriter writer = new TsFileWriter(testFile)) {
       writer.registerTimeseries(deviceID, new MeasurementSchema("s", TSDataType.DOUBLE));
-      TSRecord record = new TSRecord(0, deviceID);
+      TSRecord record = new TSRecord(deviceID, 0);
       record.addTuple(new DoubleDataPoint("s", 0.0));
       writer.writeRecord(record);
     }

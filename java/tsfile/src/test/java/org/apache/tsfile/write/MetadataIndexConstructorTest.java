@@ -437,7 +437,7 @@ public class MetadataIndexConstructorTest {
           // the number of record rows
           int rowNum = 10;
           for (int row = 0; row < rowNum; row++) {
-            TSRecord tsRecord = new TSRecord(row, device);
+            TSRecord tsRecord = new TSRecord(device, row);
             for (String measurement : singleMeasurement[i]) {
               DataPoint dPoint = new LongDataPoint(measurement, row);
               tsRecord.addTuple(dPoint);

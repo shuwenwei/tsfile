@@ -19,6 +19,10 @@
 
 package org.apache.tsfile.read;
 
+import org.apache.tsfile.file.metadata.IDeviceID;
+import org.apache.tsfile.file.metadata.MetadataIndexNode;
+import org.apache.tsfile.file.metadata.TableSchema;
+import org.apache.tsfile.file.metadata.TsFileMetadata;
 import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
 import org.apache.tsfile.read.controller.IChunkLoader;
 import org.apache.tsfile.read.controller.IMetadataQuerier;
@@ -26,8 +30,15 @@ import org.apache.tsfile.read.controller.MetadataQuerierByFileImpl;
 import org.apache.tsfile.read.expression.QueryExpression;
 import org.apache.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.tsfile.read.query.executor.TsFileExecutor;
+import org.apache.tsfile.write.schema.IMeasurementSchema;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TsFileReader implements AutoCloseable {
 
@@ -36,12 +47,46 @@ public class TsFileReader implements AutoCloseable {
   private IChunkLoader chunkLoader;
   private TsFileExecutor tsFileExecutor;
 
+  public TsFileReader(File file) throws IOException {
+    this(new TsFileSequenceReader(file.getPath()));
+  }
+
   /** Constructor, create ReadOnlyTsFile with {@link TsFileSequenceReader}. */
   public TsFileReader(TsFileSequenceReader fileReader) throws IOException {
     this.fileReader = fileReader;
     this.metadataQuerier = new MetadataQuerierByFileImpl(fileReader);
     this.chunkLoader = new CachedChunkLoaderImpl(fileReader);
     tsFileExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
+  }
+
+  public List<String> getAllDevices() throws IOException {
+    return fileReader.getAllDevices().stream()
+        .map(IDeviceID::toString)
+        .collect(Collectors.toList());
+  }
+
+  public List<IMeasurementSchema> getTimeseriesSchema(String deviceId) throws IOException {
+    IDeviceID iDeviceID = IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId);
+    TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
+    TableSchema tableSchema = tsFileMetadata.getTableSchemaMap().get(iDeviceID.getTableName());
+    if (tableSchema == null) {
+      return Collections.emptyList();
+    }
+    return tableSchema.getColumnSchemas();
+  }
+
+  public List<String> getAllTables() throws IOException {
+    Map<String, TableSchema> tableSchemaMap = fileReader.readFileMetadata().getTableSchemaMap();
+    return new ArrayList<>(tableSchemaMap.keySet());
+  }
+
+  public List<IDeviceID> getAllTableDevices(String tableName) throws IOException {
+    MetadataIndexNode tableMetadataIndexNode =
+        fileReader.readFileMetadata().getTableMetadataIndexNode(tableName);
+    if (tableMetadataIndexNode == null) {
+      return Collections.emptyList();
+    }
+    return fileReader.getAllDevices(tableMetadataIndexNode);
   }
 
   public QueryDataSet query(QueryExpression queryExpression) throws IOException {

@@ -71,11 +71,11 @@ public class ForceAppendTsFileWriterTest {
     writer.registerTimeseries(
         new Path("d1"), new MeasurementSchema("s2", TSDataType.FLOAT, TSEncoding.RLE));
     writer.writeRecord(
-        new TSRecord(1, "d1")
+        new TSRecord("d1", 1)
             .addTuple(new FloatDataPoint("s1", 5))
             .addTuple(new FloatDataPoint("s2", 4)));
     writer.writeRecord(
-        new TSRecord(2, "d1")
+        new TSRecord("d1", 2)
             .addTuple(new FloatDataPoint("s1", 5))
             .addTuple(new FloatDataPoint("s2", 4)));
     writer.flush();
@@ -93,7 +93,7 @@ public class ForceAppendTsFileWriterTest {
     writer.registerTimeseries(
         new Path("d1"), new MeasurementSchema("s2", TSDataType.FLOAT, TSEncoding.RLE));
     writer.writeRecord(
-        new TSRecord(3, "d1")
+        new TSRecord("d1", 3)
             .addTuple(new FloatDataPoint("s1", 5))
             .addTuple(new FloatDataPoint("s2", 4)));
     writer.close();

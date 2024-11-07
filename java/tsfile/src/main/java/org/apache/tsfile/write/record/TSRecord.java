@@ -54,15 +54,15 @@ public class TSRecord {
   /**
    * constructor of TSRecord.
    *
-   * @param timestamp timestamp of this TSRecord
    * @param deviceId deviceId of this TSRecord
+   * @param timestamp timestamp of this TSRecord
    */
-  public TSRecord(long timestamp, String deviceId) {
+  public TSRecord(String deviceId, long timestamp) {
     this.time = timestamp;
     this.deviceId = Factory.DEFAULT_FACTORY.create(deviceId);
   }
 
-  public TSRecord(long timestamp, IDeviceID deviceId) {
+  public TSRecord(IDeviceID deviceId, long timestamp) {
     this.time = timestamp;
     this.deviceId = deviceId;
   }

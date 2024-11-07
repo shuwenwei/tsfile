@@ -65,7 +65,7 @@ public class TsFileGeneratorUtils {
       throws IOException, WriteProcessException {
     for (long time = startTime; time < rowSize + startTime; time++, startValue++) {
       // construct TsRecord
-      TSRecord tsRecord = new TSRecord(time, deviceId);
+      TSRecord tsRecord = new TSRecord(deviceId, time);
       for (IMeasurementSchema schema : schemas) {
         DataPoint dPoint;
         switch (schema.getType()) {
@@ -372,11 +372,11 @@ public class TsFileGeneratorUtils {
           // construct TsRecord
           TSRecord tsRecord =
               new TSRecord(
-                  time,
                   testStorageGroup
                       + PATH_SEPARATOR
                       + "d"
-                      + (deviceIndex.get(i) + alignDeviceOffset));
+                      + (deviceIndex.get(i) + alignDeviceOffset),
+                  time);
           for (IMeasurementSchema schema : alignedMeasurementSchemas) {
             DataPoint dPoint =
                 new StringDataPoint(
@@ -434,7 +434,7 @@ public class TsFileGeneratorUtils {
         for (long time = startTime; time < pointNum + startTime; time++) {
           // construct TsRecord
           TSRecord tsRecord =
-              new TSRecord(time, testStorageGroup + PATH_SEPARATOR + "d" + deviceIndex.get(i));
+              new TSRecord(testStorageGroup + PATH_SEPARATOR + "d" + deviceIndex.get(i), time);
           for (IMeasurementSchema schema : measurementSchemas) {
             DataPoint dPoint =
                 new StringDataPoint(
