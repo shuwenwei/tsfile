@@ -184,7 +184,7 @@ public class AES128TsFileReadWriteTest {
       DataPoint dPoint1 = new FloatDataPoint("sensor_1", 1.2f);
       tsRecord.addTuple(dPoint1);
       // write a TSRecord to TsFile
-      tsFileWriter.write(tsRecord);
+      tsFileWriter.writeRecord(tsRecord);
     }
 
     // read example : no filter
@@ -227,7 +227,7 @@ public class AES128TsFileReadWriteTest {
         DataPoint dPoint1 = proxy.generateOne(i);
         tsRecord.addTuple(dPoint1);
         // write a TSRecord to TsFile
-        tsFileWriter.write(tsRecord);
+        tsFileWriter.writeRecord(tsRecord);
       }
     }
   }

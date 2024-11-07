@@ -100,9 +100,9 @@ public class TsFileGeneratorUtils {
       }
       // write
       if (isAligned) {
-        tsFileWriter.writeAligned(tsRecord);
+        tsFileWriter.writeRecord(tsRecord);
       } else {
-        tsFileWriter.write(tsRecord);
+        tsFileWriter.writeRecord(tsRecord);
       }
     }
   }
@@ -384,7 +384,7 @@ public class TsFileGeneratorUtils {
             tsRecord.addTuple(dPoint);
           }
           // write
-          tsFileWriter.writeAligned(tsRecord);
+          tsFileWriter.writeRecord(tsRecord);
         }
       }
     } finally {
@@ -442,7 +442,7 @@ public class TsFileGeneratorUtils {
             tsRecord.addTuple(dPoint);
           }
           // write
-          tsFileWriter.write(tsRecord);
+          tsFileWriter.writeRecord(tsRecord);
         }
       }
       return file;

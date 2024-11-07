@@ -175,13 +175,13 @@ public class TsFileWriterTest {
     TSRecord record = new TSRecord(10000, "d1");
     record.addTuple(new FloatDataPoint("s1", 5.0f));
     record.addTuple(new IntDataPoint("s2", 5));
-    writer.write(record);
+    writer.writeRecord(record);
 
     // not existed time series
     record = new TSRecord(10001, "d1");
     record.addTuple(new FloatDataPoint("s4", 5));
     try {
-      writer.write(record);
+      writer.writeRecord(record);
     } catch (WriteProcessException e) {
       assertTrue(e instanceof NoMeasurementException);
     }
@@ -190,7 +190,7 @@ public class TsFileWriterTest {
     record = new TSRecord(10001, "d1");
     record.addTuple(new FloatDataPoint("s3", 5));
     try {
-      writer.write(record);
+      writer.writeRecord(record);
     } catch (TsFileEncodingException e) {
       // do nothing
     }
@@ -209,7 +209,7 @@ public class TsFileWriterTest {
     TSRecord record = new TSRecord(10002, "d2");
     record.addTuple(new IntDataPoint("s1", 5));
     try {
-      writer.write(record);
+      writer.writeRecord(record);
     } catch (WriteProcessException e) {
       Assert.assertEquals("No measurement for nonAligned", e.getMessage());
     }
@@ -224,7 +224,7 @@ public class TsFileWriterTest {
       TSRecord record = new TSRecord(10000 + i, "d" + i);
       record.addTuple(new IntDataPoint("s1", 5));
       try {
-        writer.writeAligned(record);
+        writer.writeRecord(record);
       } catch (UnsupportedOperationException e) {
         // do nothing
       }
@@ -240,7 +240,7 @@ public class TsFileWriterTest {
     TSRecord record = new TSRecord(10002, "d2");
     record.addTuple(new IntDataPoint("s1", 5));
     try {
-      writer.writeAligned(record);
+      writer.writeRecord(record);
     } catch (UnsupportedOperationException e) {
       // do nothing
     }

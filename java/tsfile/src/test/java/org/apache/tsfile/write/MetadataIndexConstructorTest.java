@@ -443,7 +443,7 @@ public class MetadataIndexConstructorTest {
               tsRecord.addTuple(dPoint);
             }
             if (tsRecord.dataPointList.size() > 0) {
-              tsFileWriter.write(tsRecord);
+              tsFileWriter.writeRecord(tsRecord);
             }
           }
         }

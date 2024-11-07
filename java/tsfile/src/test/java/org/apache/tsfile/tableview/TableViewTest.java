@@ -340,9 +340,9 @@ public class TableViewTest {
       for (int j = 0; j < measurementSchemaNum; j++) {
         tsRecord.addTuple(new LongDataPoint("s" + j, i));
       }
-      writer.write(tsRecord);
+      writer.writeRecord(tsRecord);
       tsRecord.deviceId = deviceIDAligned;
-      writer.writeAligned(tsRecord);
+      writer.writeRecord(tsRecord);
     }
     writer.close();
 
@@ -379,7 +379,7 @@ public class TableViewTest {
       for (int j = 0; j < measurementSchemaNum; j++) {
         tsRecord.addTuple(new LongDataPoint("s" + j, i));
       }
-      writer.write(tsRecord);
+      writer.writeRecord(tsRecord);
     }
     writer.close();
 

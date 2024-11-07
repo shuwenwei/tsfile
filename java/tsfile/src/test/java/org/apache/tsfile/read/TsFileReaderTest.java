@@ -95,12 +95,12 @@ public class TsFileReaderTest {
       } else {
         t.addTuple(new IntDataPoint("id", i));
       }
-      tsFileWriter.write(t);
+      tsFileWriter.writeRecord(t);
     }
     // make same value to filter
     TSRecord t = new TSRecord(101011000000L, "t");
     t.addTuple(new IntDataPoint("id", 8000001));
-    tsFileWriter.write(t);
+    tsFileWriter.writeRecord(t);
     tsFileWriter.flushAllChunkGroups();
     tsFileWriter.close();
 

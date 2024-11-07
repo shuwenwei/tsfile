@@ -158,7 +158,7 @@ public class TsFileSequenceReaderTest {
       writer.registerTimeseries(deviceID, new MeasurementSchema("s", TSDataType.DOUBLE));
       TSRecord record = new TSRecord(0, deviceID);
       record.addTuple(new DoubleDataPoint("s", 0.0));
-      writer.write(record);
+      writer.writeRecord(record);
     }
 
     TsFileSequenceReader reader = new TsFileSequenceReader(testFile.getAbsolutePath());
@@ -176,7 +176,7 @@ public class TsFileSequenceReaderTest {
       writer.registerTimeseries(deviceID, new MeasurementSchema("s", TSDataType.DOUBLE));
       TSRecord record = new TSRecord(0, deviceID);
       record.addTuple(new DoubleDataPoint("s", 0.0));
-      writer.write(record);
+      writer.writeRecord(record);
     }
 
     TsFileSequenceReader reader = new TsFileSequenceReader(testFile.getAbsolutePath());

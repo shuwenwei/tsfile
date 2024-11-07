@@ -129,17 +129,17 @@ public class TimeGeneratorReadWriteTest {
     TSRecord tsRecord = new TSRecord(1, "d1");
     DataPoint dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(2, "d1");
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(3, "d1");
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsFileWriter.flushAllChunkGroups();
 
@@ -147,17 +147,17 @@ public class TimeGeneratorReadWriteTest {
     tsRecord = new TSRecord(2, "d1");
     DataPoint dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(3, "d1");
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(4, "d1");
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsFileWriter.flushAllChunkGroups();
 
@@ -165,12 +165,12 @@ public class TimeGeneratorReadWriteTest {
     tsRecord = new TSRecord(4, "d1");
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(5, "d1");
     dPoint1 = new FloatDataPoint("s1", 1.2f);
     tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsFileWriter.flushAllChunkGroups();
 
@@ -178,12 +178,12 @@ public class TimeGeneratorReadWriteTest {
     tsRecord = new TSRecord(5, "d1");
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(6, "d1");
     dPoint2 = new IntDataPoint("s2", 20);
     tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     // close TsFile
     tsFileWriter.close();

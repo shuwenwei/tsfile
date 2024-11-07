@@ -133,21 +133,21 @@ public class ReadWriteTest {
     tsRecord.addTuple(dPoint2);
 
     // write a TSRecord to TsFile
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(2, "d1");
     dPoint2 = new IntDataPoint("s2", 20);
     DataPoint dPoint3 = new IntDataPoint("s3", 50);
     tsRecord.addTuple(dPoint2);
     tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(3, "d1");
     dPoint1 = new FloatDataPoint("s1", 1.4f);
     dPoint2 = new IntDataPoint("s2", 21);
     tsRecord.addTuple(dPoint1);
     tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(4, "d1");
     dPoint1 = new FloatDataPoint("s1", 1.2f);
@@ -156,7 +156,7 @@ public class ReadWriteTest {
     tsRecord.addTuple(dPoint1);
     tsRecord.addTuple(dPoint2);
     tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(6, "d1");
     dPoint1 = new FloatDataPoint("s1", 7.2f);
@@ -165,7 +165,7 @@ public class ReadWriteTest {
     tsRecord.addTuple(dPoint1);
     tsRecord.addTuple(dPoint2);
     tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(7, "d1");
     dPoint1 = new FloatDataPoint("s1", 6.2f);
@@ -174,7 +174,7 @@ public class ReadWriteTest {
     tsRecord.addTuple(dPoint1);
     tsRecord.addTuple(dPoint2);
     tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     tsRecord = new TSRecord(8, "d1");
     dPoint1 = new FloatDataPoint("s1", 9.2f);
@@ -183,7 +183,7 @@ public class ReadWriteTest {
     tsRecord.addTuple(dPoint1);
     tsRecord.addTuple(dPoint2);
     tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+    tsFileWriter.writeRecord(tsRecord);
 
     // close TsFile
     tsFileWriter.close();
