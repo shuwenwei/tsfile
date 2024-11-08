@@ -62,6 +62,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -594,20 +595,20 @@ public class TsFileReaderTest {
     try {
       File file = TsFileGeneratorUtils.generateAlignedTsFile(filePath, 5, 1, 10, 1, 1, 10, 100);
       List<IDeviceID> deviceIDList = new ArrayList<>();
+      TableSchema tableSchema =
+          new TableSchema(
+              "t1",
+              Arrays.asList(
+                  new MeasurementSchema("id1", TSDataType.STRING),
+                  new MeasurementSchema("id2", TSDataType.STRING),
+                  new MeasurementSchema("id3", TSDataType.STRING),
+                  new MeasurementSchema("s1", TSDataType.INT32)),
+              Arrays.asList(
+                  Tablet.ColumnCategory.ID,
+                  Tablet.ColumnCategory.ID,
+                  Tablet.ColumnCategory.ID,
+                  Tablet.ColumnCategory.MEASUREMENT));
       try (TsFileWriter writer = new TsFileWriter(file)) {
-        TableSchema tableSchema =
-            new TableSchema(
-                "t1",
-                Arrays.asList(
-                    new MeasurementSchema("id1", TSDataType.STRING),
-                    new MeasurementSchema("id2", TSDataType.STRING),
-                    new MeasurementSchema("id3", TSDataType.STRING),
-                    new MeasurementSchema("s1", TSDataType.INT32)),
-                Arrays.asList(
-                    Tablet.ColumnCategory.ID,
-                    Tablet.ColumnCategory.ID,
-                    Tablet.ColumnCategory.ID,
-                    Tablet.ColumnCategory.MEASUREMENT));
         writer.registerTableSchema(tableSchema);
         Tablet tablet =
             new Tablet(
@@ -646,6 +647,8 @@ public class TsFileReaderTest {
         Assert.assertEquals(
             new HashSet<>(deviceIDList), new HashSet<>(tsFileReader.getAllTableDevices("t1")));
         Assert.assertEquals("t1", tsFileReader.getAllTables().get(0));
+        Assert.assertEquals(
+            tableSchema, tsFileReader.getTableSchema(Collections.singletonList("t1")).get(0));
       }
     } finally {
       Files.deleteIfExists(Paths.get(filePath));

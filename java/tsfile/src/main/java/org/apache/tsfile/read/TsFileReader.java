@@ -22,6 +22,7 @@ package org.apache.tsfile.read;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
+import org.apache.tsfile.file.metadata.TsFileMetadata;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
 import org.apache.tsfile.read.controller.IChunkLoader;
@@ -85,6 +86,16 @@ public class TsFileReader implements AutoCloseable {
       return Collections.emptyList();
     }
     return fileReader.getAllDevices(tableMetadataIndexNode);
+  }
+
+  public List<TableSchema> getTableSchema(List<String> tableNames) throws IOException {
+    TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
+    Map<String, TableSchema> tableSchemaMap = tsFileMetadata.getTableSchemaMap();
+    List<TableSchema> result = new ArrayList<>(tableNames.size());
+    for (String tableName : tableNames) {
+      result.add(tableSchemaMap.get(tableName));
+    }
+    return result;
   }
 
   @Deprecated
