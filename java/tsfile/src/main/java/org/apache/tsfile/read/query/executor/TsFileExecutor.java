@@ -194,6 +194,9 @@ public class TsFileExecutor implements QueryExecutor {
         IChunkMetadata iChunkMetadata = chunkMetadataList.get(0);
         TSDataType dataType;
         if (iChunkMetadata instanceof AlignedChunkMetadata) {
+          // In the current implementation, even if there are multiple columns in the same aligned
+          // series within the selectedPathList,
+          // only one column will be queried at a time.
           dataType =
               ((AlignedChunkMetadata) iChunkMetadata)
                   .getValueChunkMetadataList()
