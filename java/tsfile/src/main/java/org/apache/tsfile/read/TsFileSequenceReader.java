@@ -1354,45 +1354,13 @@ public class TsFileSequenceReader implements AutoCloseable {
   }
 
   /* This method will only deserialize the TimeseriesMetadata, not including chunk metadata list */
-  private List<TimeseriesMetadata> getDeviceTimeseriesMetadataWithoutChunkMetadata(IDeviceID device)
+  public List<TimeseriesMetadata> getDeviceTimeseriesMetadataWithoutChunkMetadata(IDeviceID device)
       throws IOException {
-    MetadataIndexNode metadataIndexNode =
-        tsFileMetaData.getTableMetadataIndexNode(device.getTableName());
-    Pair<IMetadataIndexEntry, Long> metadataIndexPair =
-        getMetadataAndEndOffsetOfDeviceNode(metadataIndexNode, device, true);
-    if (metadataIndexPair == null) {
-      return Collections.emptyList();
-    }
-    ByteBuffer buffer = readData(metadataIndexPair.left.getOffset(), metadataIndexPair.right);
-    Map<IDeviceID, List<TimeseriesMetadata>> timeseriesMetadataMap = new TreeMap<>();
-    generateMetadataIndex(
-        metadataIndexPair.left,
-        buffer,
-        device,
-        MetadataIndexNodeType.INTERNAL_MEASUREMENT,
-        timeseriesMetadataMap,
-        false);
-    List<TimeseriesMetadata> deviceTimeseriesMetadata = new ArrayList<>();
-    for (List<TimeseriesMetadata> timeseriesMetadataList : timeseriesMetadataMap.values()) {
-      deviceTimeseriesMetadata.addAll(timeseriesMetadataList);
-    }
-    return deviceTimeseriesMetadata;
-  }
-
-  public List<IMeasurementSchema> getTimeseriesSchema(IDeviceID device) throws IOException {
-    List<TimeseriesMetadata> deviceTimeseriesMetadata = getDeviceTimeseriesMetadata(device, false);
-    List<IMeasurementSchema> measurementSchemaList = new ArrayList<>();
-    for (TimeseriesMetadata timeseriesMetadata : deviceTimeseriesMetadata) {
-      measurementSchemaList.add(
-          new MeasurementSchema(
-              timeseriesMetadata.getMeasurementId(), timeseriesMetadata.getTsDataType()));
-    }
-    return measurementSchemaList;
+    return getDeviceTimeseriesMetadata(device, false);
   }
 
   /* This method will not only deserialize the TimeseriesMetadata, but also all the chunk metadata list meanwhile. */
-  private List<TimeseriesMetadata> getDeviceTimeseriesMetadata(IDeviceID device)
-      throws IOException {
+  public List<TimeseriesMetadata> getDeviceTimeseriesMetadata(IDeviceID device) throws IOException {
     return getDeviceTimeseriesMetadata(device, true);
   }
 

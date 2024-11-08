@@ -22,6 +22,7 @@ package org.apache.tsfile.read;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
+import org.apache.tsfile.file.metadata.TimeseriesMetadata;
 import org.apache.tsfile.file.metadata.TsFileMetadata;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
@@ -35,6 +36,7 @@ import org.apache.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.read.query.executor.TsFileExecutor;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
+import org.apache.tsfile.write.schema.MeasurementSchema;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +73,15 @@ public class TsFileReader implements AutoCloseable {
 
   public List<IMeasurementSchema> getTimeseriesSchema(String deviceId) throws IOException {
     IDeviceID iDeviceID = IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId);
-    return fileReader.getTimeseriesSchema(iDeviceID);
+    List<TimeseriesMetadata> deviceTimeseriesMetadata =
+        fileReader.getDeviceTimeseriesMetadataWithoutChunkMetadata(iDeviceID);
+    List<IMeasurementSchema> measurementSchemaList = new ArrayList<>();
+    for (TimeseriesMetadata timeseriesMetadata : deviceTimeseriesMetadata) {
+      measurementSchemaList.add(
+          new MeasurementSchema(
+              timeseriesMetadata.getMeasurementId(), timeseriesMetadata.getTsDataType()));
+    }
+    return measurementSchemaList;
   }
 
   public List<String> getAllTables() throws IOException {
