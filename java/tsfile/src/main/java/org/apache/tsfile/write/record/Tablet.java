@@ -86,6 +86,11 @@ public class Tablet {
   /** Each {@link BitMap} represents the existence of each value in the current column. */
   public BitMap[] bitMaps;
 
+  /**
+   * For compatibility with the usage of directly modifying Tablet content through public fields.
+   */
+  private boolean autoUpdateBitMaps = false;
+
   /** The number of rows to include in this {@link Tablet} */
   public int rowSize;
 
@@ -240,7 +245,9 @@ public class Tablet {
     this.bitMaps = new BitMap[schemas.size()];
     for (int column = 0; column < schemas.size(); column++) {
       BitMap bitMap = new BitMap(getMaxRowNumber());
-      bitMap.markAll();
+      if (autoUpdateBitMaps) {
+        bitMap.markAll();
+      }
       this.bitMaps[column] = bitMap;
     }
   }
@@ -408,6 +415,7 @@ public class Tablet {
   }
 
   private void updateBitMap(int rowIndex, int columnIndex, boolean mark) {
+    autoUpdateBitMaps = true;
     if (bitMaps == null) {
       initBitMaps();
     }
@@ -430,6 +438,18 @@ public class Tablet {
   /** Reset Tablet to the default state - set the rowSize to 0 and reset bitMaps */
   public void reset() {
     rowSize = 0;
+    if (bitMaps != null) {
+      for (BitMap bitMap : bitMaps) {
+        if (bitMap == null) {
+          continue;
+        }
+        if (autoUpdateBitMaps) {
+          bitMap.markAll();
+        } else {
+          bitMap.reset();
+        }
+      }
+    }
   }
 
   private void createColumns() {

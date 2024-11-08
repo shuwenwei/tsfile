@@ -93,6 +93,7 @@ public class TsFileReader implements AutoCloseable {
     return fileReader.getAllDevices(tableMetadataIndexNode);
   }
 
+  @Deprecated
   public QueryDataSet query(QueryExpression queryExpression) throws IOException {
     return tsFileExecutor.execute(queryExpression);
   }
@@ -107,6 +108,7 @@ public class TsFileReader implements AutoCloseable {
     return new ResultSet(tsFileExecutor.execute(queryExpression));
   }
 
+  @Deprecated
   public QueryDataSet query(
       QueryExpression queryExpression, long partitionStartOffset, long partitionEndOffset)
       throws IOException {
