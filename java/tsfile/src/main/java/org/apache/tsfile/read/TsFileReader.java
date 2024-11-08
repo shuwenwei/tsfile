@@ -22,7 +22,6 @@ package org.apache.tsfile.read;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
-import org.apache.tsfile.file.metadata.TsFileMetadata;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
 import org.apache.tsfile.read.controller.IChunkLoader;
@@ -71,12 +70,7 @@ public class TsFileReader implements AutoCloseable {
 
   public List<IMeasurementSchema> getTimeseriesSchema(String deviceId) throws IOException {
     IDeviceID iDeviceID = IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId);
-    TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
-    TableSchema tableSchema = tsFileMetadata.getTableSchemaMap().get(iDeviceID.getTableName());
-    if (tableSchema == null) {
-      return Collections.emptyList();
-    }
-    return tableSchema.getColumnSchemas();
+    return fileReader.getTimeseriesSchema(iDeviceID);
   }
 
   public List<String> getAllTables() throws IOException {

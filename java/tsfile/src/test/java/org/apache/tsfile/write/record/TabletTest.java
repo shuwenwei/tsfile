@@ -27,11 +27,13 @@ import org.apache.tsfile.utils.BitMap;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.schema.MeasurementSchema;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -39,6 +41,47 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 public class TabletTest {
+
+  @Test
+  public void testAddValue() {
+    Tablet tablet =
+        new Tablet(
+            "root.testsg.d1",
+            Arrays.asList(
+                new MeasurementSchema("s1", TSDataType.BOOLEAN),
+                new MeasurementSchema("s2", TSDataType.BOOLEAN)));
+    tablet.addTimestamp(0, 0);
+    tablet.addValue("s1", 0, true);
+    tablet.addValue("s2", 0, true);
+    tablet.addTimestamp(1, 1);
+    tablet.addValue(1, 0, false);
+    tablet.addValue(1, 1, true);
+    tablet.addTimestamp(2, 2);
+    tablet.addValue(2, 0, true);
+
+    Assert.assertEquals(tablet.rowSize, 3);
+    Assert.assertTrue((Boolean) tablet.getValue(0, 0));
+    Assert.assertTrue((Boolean) tablet.getValue(0, 1));
+    Assert.assertFalse((Boolean) tablet.getValue(1, 0));
+    Assert.assertTrue((Boolean) tablet.getValue(1, 1));
+    Assert.assertTrue((Boolean) tablet.getValue(2, 0));
+    Assert.assertFalse(tablet.bitMaps[0].isMarked(0));
+    Assert.assertFalse(tablet.bitMaps[0].isMarked(1));
+    Assert.assertFalse(tablet.bitMaps[0].isMarked(2));
+    Assert.assertFalse(tablet.bitMaps[1].isMarked(0));
+    Assert.assertFalse(tablet.bitMaps[1].isMarked(1));
+    Assert.assertTrue(tablet.bitMaps[1].isMarked(2));
+
+    tablet.addTimestamp(9, 9);
+    Assert.assertEquals(10, tablet.rowSize);
+
+    tablet.reset();
+    Assert.assertEquals(0, tablet.rowSize);
+    Assert.assertTrue(tablet.bitMaps[0].isAllMarked());
+    Assert.assertTrue(tablet.bitMaps[0].isAllMarked());
+    Assert.assertTrue(tablet.bitMaps[0].isAllMarked());
+  }
+
   @Test
   public void testSerializationAndDeSerialization() {
     final String deviceId = "root.sg";

@@ -42,9 +42,11 @@ import org.apache.tsfile.read.filter.factory.ValueFilterApi;
 import org.apache.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.tsfile.utils.Binary;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
+import org.apache.tsfile.utils.TsFileGeneratorUtils;
 import org.apache.tsfile.write.TsFileWriter;
 import org.apache.tsfile.write.record.TSRecord;
 import org.apache.tsfile.write.record.datapoint.IntDataPoint;
+import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.schema.MeasurementSchema;
 import org.apache.tsfile.write.schema.Schema;
 
@@ -53,6 +55,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -552,5 +556,30 @@ public class TsFileReaderTest {
       Assert.assertEquals(expected.length, i);
     }
     TsFileGeneratorForTest.closeAlignedTsFile();
+  }
+
+  @Test
+  public void testGetDeviceMethods() throws IOException, WriteProcessException {
+    String filePath = TsFileGeneratorForTest.getTestTsFilePath("root.testsg", 0, 0, 0);
+    try {
+      File file = TsFileGeneratorUtils.generateAlignedTsFile(filePath, 5, 1, 10, 1, 1, 10, 100);
+      try (TsFileReader tsFileReader = new TsFileReader(file)) {
+        Assert.assertEquals(
+            Arrays.asList(
+                "root.testsg.d10000",
+                "root.testsg.d10001",
+                "root.testsg.d10002",
+                "root.testsg.d10003",
+                "root.testsg.d10004"),
+            tsFileReader.getAllDevices());
+        List<IMeasurementSchema> timeseriesSchema =
+            tsFileReader.getTimeseriesSchema("root.testsg.d10000");
+        Assert.assertEquals(2, timeseriesSchema.size());
+        Assert.assertEquals("", timeseriesSchema.get(0).getMeasurementName());
+        Assert.assertEquals("s0", timeseriesSchema.get(1).getMeasurementName());
+      }
+    } finally {
+      Files.deleteIfExists(Paths.get(filePath));
+    }
   }
 }

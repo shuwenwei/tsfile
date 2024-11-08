@@ -1379,9 +1379,25 @@ public class TsFileSequenceReader implements AutoCloseable {
     return deviceTimeseriesMetadata;
   }
 
+  public List<IMeasurementSchema> getTimeseriesSchema(IDeviceID device) throws IOException {
+    List<TimeseriesMetadata> deviceTimeseriesMetadata = getDeviceTimeseriesMetadata(device, false);
+    List<IMeasurementSchema> measurementSchemaList = new ArrayList<>();
+    for (TimeseriesMetadata timeseriesMetadata : deviceTimeseriesMetadata) {
+      measurementSchemaList.add(
+          new MeasurementSchema(
+              timeseriesMetadata.getMeasurementId(), timeseriesMetadata.getTsDataType()));
+    }
+    return measurementSchemaList;
+  }
+
   /* This method will not only deserialize the TimeseriesMetadata, but also all the chunk metadata list meanwhile. */
   private List<TimeseriesMetadata> getDeviceTimeseriesMetadata(IDeviceID device)
       throws IOException {
+    return getDeviceTimeseriesMetadata(device, true);
+  }
+
+  private List<TimeseriesMetadata> getDeviceTimeseriesMetadata(
+      IDeviceID device, boolean needChunkMetadata) throws IOException {
     MetadataIndexNode metadataIndexNode =
         tsFileMetaData.getTableMetadataIndexNode(device.getTableName());
     Pair<IMetadataIndexEntry, Long> metadataIndexPair =
@@ -1397,7 +1413,7 @@ public class TsFileSequenceReader implements AutoCloseable {
         device,
         MetadataIndexNodeType.INTERNAL_MEASUREMENT,
         timeseriesMetadataMap,
-        true);
+        needChunkMetadata);
     List<TimeseriesMetadata> deviceTimeseriesMetadata = new ArrayList<>();
     for (List<TimeseriesMetadata> timeseriesMetadataList : timeseriesMetadataMap.values()) {
       deviceTimeseriesMetadata.addAll(timeseriesMetadataList);
