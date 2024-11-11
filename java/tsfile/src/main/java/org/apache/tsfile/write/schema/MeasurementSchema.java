@@ -18,6 +18,7 @@
  */
 package org.apache.tsfile.write.schema;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.common.conf.TSFileDescriptor;
 import org.apache.tsfile.encoding.encoder.Encoder;
 import org.apache.tsfile.encoding.encoder.TSEncodingBuilder;
@@ -55,6 +56,7 @@ public class MeasurementSchema
 
   public MeasurementSchema() {}
 
+  @TsFileApi
   public MeasurementSchema(String measurementName, TSDataType dataType) {
     this(
         measurementName,
@@ -74,6 +76,7 @@ public class MeasurementSchema
         null);
   }
 
+  @TsFileApi
   public MeasurementSchema(
       String measurementName,
       TSDataType dataType,

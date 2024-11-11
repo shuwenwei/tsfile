@@ -18,6 +18,7 @@
  */
 package org.apache.tsfile.write;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.common.conf.TSFileDescriptor;
 import org.apache.tsfile.encrypt.EncryptParameter;
@@ -108,6 +109,7 @@ public class TsFileWriter implements AutoCloseable {
    *
    * @param file the File to be written by this TsFileWriter
    */
+  @TsFileApi
   public TsFileWriter(File file) throws IOException {
     this(new TsFileIOWriter(file), new Schema(), TSFileDescriptor.getInstance().getConfig());
   }
@@ -249,6 +251,7 @@ public class TsFileWriter implements AutoCloseable {
     getSchema().registerDevice(deviceID, templateName);
   }
 
+  @TsFileApi
   public void registerTimeseries(String deviceId, IMeasurementSchema measurementSchema)
       throws WriteProcessException {
     registerTimeseries(IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId), measurementSchema);
@@ -261,6 +264,7 @@ public class TsFileWriter implements AutoCloseable {
   }
 
   /** Register nonAligned timeseries by single. */
+  @TsFileApi
   public void registerTimeseries(IDeviceID deviceID, IMeasurementSchema measurementSchema)
       throws WriteProcessException {
     MeasurementGroup measurementGroup;
@@ -298,6 +302,7 @@ public class TsFileWriter implements AutoCloseable {
     }
   }
 
+  @TsFileApi
   public void registerAlignedTimeseries(
       String deviceId, List<IMeasurementSchema> measurementSchemas) throws WriteProcessException {
     registerAlignedTimeseries(
@@ -313,6 +318,7 @@ public class TsFileWriter implements AutoCloseable {
    * Register aligned timeseries. Once the device is registered for aligned timeseries, it cannot be
    * expanded.
    */
+  @TsFileApi
   public void registerAlignedTimeseries(
       IDeviceID deviceID, List<IMeasurementSchema> measurementSchemas)
       throws WriteProcessException {
@@ -514,6 +520,7 @@ public class TsFileWriter implements AutoCloseable {
    * @throws IOException exception in IO
    * @throws WriteProcessException exception in write process
    */
+  @TsFileApi
   public boolean writeRecord(TSRecord record) throws IOException, WriteProcessException {
     boolean isAligned = getSchema().getSeriesSchema(record.deviceId).isAligned();
     checkIsTimeseriesExist(record, isAligned);
@@ -528,6 +535,7 @@ public class TsFileWriter implements AutoCloseable {
    * @throws IOException exception in IO
    * @throws WriteProcessException exception in write process
    */
+  @TsFileApi
   public boolean write(Tablet tablet) throws IOException, WriteProcessException {
     // make sure the ChunkGroupWriter for this Tablet exist
     checkIsTimeseriesExist(tablet, false);
@@ -594,6 +602,7 @@ public class TsFileWriter implements AutoCloseable {
    *     function just return false, the Override of IoTDB may return true.
    * @throws IOException exception in IO
    */
+  @TsFileApi
   public boolean flush() throws IOException {
     if (recordCount > 0) {
       for (Map.Entry<IDeviceID, IChunkGroupWriter> entry : groupWriters.entrySet()) {
@@ -651,6 +660,7 @@ public class TsFileWriter implements AutoCloseable {
    * @throws IOException exception in IO
    */
   @Override
+  @TsFileApi
   public void close() throws IOException {
     LOG.info("start close file");
     flush();
@@ -681,6 +691,7 @@ public class TsFileWriter implements AutoCloseable {
    * @throws IOException if the file cannot be written
    * @throws WriteProcessException if the schema is not registered first
    */
+  @TsFileApi
   public boolean writeTable(Tablet tablet) throws IOException, WriteProcessException {
     return writeTable(tablet, null);
   }

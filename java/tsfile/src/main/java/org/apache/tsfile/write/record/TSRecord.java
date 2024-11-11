@@ -18,6 +18,7 @@
  */
 package org.apache.tsfile.write.record;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.IDeviceID.Factory;
@@ -57,11 +58,13 @@ public class TSRecord {
    * @param deviceId deviceId of this TSRecord
    * @param timestamp timestamp of this TSRecord
    */
+  @TsFileApi
   public TSRecord(String deviceId, long timestamp) {
     this.time = timestamp;
     this.deviceId = Factory.DEFAULT_FACTORY.create(deviceId);
   }
 
+  @TsFileApi
   public TSRecord(IDeviceID deviceId, long timestamp) {
     this.time = timestamp;
     this.deviceId = deviceId;
@@ -81,35 +84,43 @@ public class TSRecord {
     return this;
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, int val) {
     return addTuple(new IntDataPoint(measurementName, val));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, long val) {
     return addTuple(new LongDataPoint(measurementName, val));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, float val) {
     return addTuple(new FloatDataPoint(measurementName, val));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, double val) {
     return addTuple(new DoubleDataPoint(measurementName, val));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, boolean val) {
     return addTuple(new BooleanDataPoint(measurementName, val));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, String val) {
     return addTuple(
         new StringDataPoint(measurementName, new Binary(val, TSFileConfig.STRING_CHARSET)));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, byte[] val) {
     return addTuple(new StringDataPoint(measurementName, new Binary(val)));
   }
 
+  @TsFileApi
   public TSRecord addPoint(String measurementName, LocalDate val) {
     return addTuple(new DateDataPoint(measurementName, val));
   }

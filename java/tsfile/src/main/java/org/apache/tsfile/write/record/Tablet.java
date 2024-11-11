@@ -19,6 +19,7 @@
 
 package org.apache.tsfile.write.record;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.file.metadata.IDeviceID;
@@ -122,6 +123,7 @@ public class Tablet {
     reset();
   }
 
+  @TsFileApi
   public Tablet(String deviceId, List<String> measurementList, List<TSDataType> dataTypeList) {
     this(deviceId, measurementList, dataTypeList, DEFAULT_SIZE);
   }
@@ -136,6 +138,7 @@ public class Tablet {
    * @param dataTypeList the list of {@link TSDataType}s for creating the row batch
    * @param maxRowNum the maximum number of rows for this tablet
    */
+  @TsFileApi
   public Tablet(
       String deviceId, List<String> measurementList, List<TSDataType> dataTypeList, int maxRowNum) {
     this(
@@ -154,6 +157,7 @@ public class Tablet {
     this(tableName, measurementList, dataTypeList, columnCategoryList, DEFAULT_SIZE);
   }
 
+  @TsFileApi
   public Tablet(
       String tableName,
       List<String> measurementList,
@@ -252,6 +256,7 @@ public class Tablet {
     }
   }
 
+  @TsFileApi
   public void addTimestamp(int rowIndex, long timestamp) {
     timestamps[rowIndex] = timestamp;
     this.rowSize = Math.max(this.rowSize, rowIndex + 1);
@@ -326,88 +331,104 @@ public class Tablet {
     }
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, int val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, int val) {
     final int[] sensor = (int[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, long val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, long val) {
     final long[] sensor = (long[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, float val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, float val) {
     final float[] sensor = (float[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, double val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, double val) {
     final double[] sensor = (double[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, boolean val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, boolean val) {
     final boolean[] sensor = (boolean[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, String val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, String val) {
     final Binary[] sensor = (Binary[]) values[columnIndex];
     sensor[rowIndex] = new Binary(val, TSFileConfig.STRING_CHARSET);
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, byte[] val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, byte[] val) {
     final Binary[] sensor = (Binary[]) values[columnIndex];
     sensor[rowIndex] = new Binary(val);
     updateBitMap(rowIndex, columnIndex, false);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, String measurement, LocalDate val) {
     Integer columnIndex = measurementIndex.get(measurement);
     addValue(rowIndex, columnIndex, val);
   }
 
+  @TsFileApi
   public void addValue(int rowIndex, int columnIndex, LocalDate val) {
     final LocalDate[] sensor = (LocalDate[]) values[columnIndex];
     sensor[rowIndex] = val;

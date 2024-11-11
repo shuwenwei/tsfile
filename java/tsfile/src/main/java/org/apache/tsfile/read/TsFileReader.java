@@ -19,6 +19,7 @@
 
 package org.apache.tsfile.read;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
@@ -53,6 +54,7 @@ public class TsFileReader implements AutoCloseable {
   private IChunkLoader chunkLoader;
   private TsFileExecutor tsFileExecutor;
 
+  @TsFileApi
   public TsFileReader(File file) throws IOException {
     this(new TsFileSequenceReader(file.getPath()));
   }
@@ -65,12 +67,14 @@ public class TsFileReader implements AutoCloseable {
     tsFileExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
   }
 
+  @TsFileApi
   public List<String> getAllDevices() throws IOException {
     return fileReader.getAllDevices().stream()
         .map(IDeviceID::toString)
         .collect(Collectors.toList());
   }
 
+  @TsFileApi
   public List<IMeasurementSchema> getTimeseriesSchema(String deviceId) throws IOException {
     IDeviceID iDeviceID = IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId);
     List<TimeseriesMetadata> deviceTimeseriesMetadata =
@@ -84,11 +88,13 @@ public class TsFileReader implements AutoCloseable {
     return measurementSchemaList;
   }
 
+  @TsFileApi
   public List<String> getAllTables() throws IOException {
     Map<String, TableSchema> tableSchemaMap = fileReader.readFileMetadata().getTableSchemaMap();
     return new ArrayList<>(tableSchemaMap.keySet());
   }
 
+  @TsFileApi
   public List<IDeviceID> getAllTableDevices(String tableName) throws IOException {
     MetadataIndexNode tableMetadataIndexNode =
         fileReader.readFileMetadata().getTableMetadataIndexNode(tableName);
@@ -98,6 +104,7 @@ public class TsFileReader implements AutoCloseable {
     return fileReader.getAllDevices(tableMetadataIndexNode);
   }
 
+  @TsFileApi
   public List<TableSchema> getTableSchema(List<String> tableNames) throws IOException {
     TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
     Map<String, TableSchema> tableSchemaMap = tsFileMetadata.getTableSchemaMap();
@@ -113,6 +120,7 @@ public class TsFileReader implements AutoCloseable {
     return tsFileExecutor.execute(queryExpression);
   }
 
+  @TsFileApi
   public ResultSet query(List<String> pathList, long startTime, long endTime) throws IOException {
     QueryExpression queryExpression = QueryExpression.create();
     for (String path : pathList) {
@@ -131,6 +139,7 @@ public class TsFileReader implements AutoCloseable {
   }
 
   @Override
+  @TsFileApi
   public void close() throws IOException {
     fileReader.close();
   }

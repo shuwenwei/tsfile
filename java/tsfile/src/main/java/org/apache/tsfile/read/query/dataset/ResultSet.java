@@ -19,6 +19,7 @@
 
 package org.apache.tsfile.read.query.dataset;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.read.common.Field;
 import org.apache.tsfile.read.common.Path;
@@ -50,10 +51,12 @@ public class ResultSet {
     }
   }
 
+  @TsFileApi
   public ResultSetMetadata getMetadata() {
     return this.resultSetMetadata;
   }
 
+  @TsFileApi
   public boolean next() throws IOException {
     while (queryDataSet.hasNext()) {
       currentRow = queryDataSet.next();
@@ -65,83 +68,101 @@ public class ResultSet {
     return false;
   }
 
+  @TsFileApi
   public int getInt(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getInt(columnIndex);
   }
 
+  @TsFileApi
   public int getInt(int columnIndex) {
     return getField(columnIndex).getIntV();
   }
 
+  @TsFileApi
   public long getLong(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getLong(columnIndex);
   }
 
+  @TsFileApi
   public long getLong(int columnIndex) {
     return getField(columnIndex).getLongV();
   }
 
+  @TsFileApi
   public float getFloat(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getFloat(columnIndex);
   }
 
+  @TsFileApi
   public float getFloat(int columnIndex) {
     return getField(columnIndex).getFloatV();
   }
 
+  @TsFileApi
   public double getDouble(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getDouble(columnIndex);
   }
 
+  @TsFileApi
   public double getDouble(int columnIndex) {
     return getField(columnIndex).getDoubleV();
   }
 
+  @TsFileApi
   public boolean getBoolean(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getBoolean(columnIndex);
   }
 
+  @TsFileApi
   public boolean getBoolean(int columnIndex) {
     return getField(columnIndex).getBoolV();
   }
 
+  @TsFileApi
   public String getString(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getString(columnIndex);
   }
 
+  @TsFileApi
   public String getString(int columnIndex) {
     return getField(columnIndex).getStringValue();
   }
 
+  @TsFileApi
   public LocalDate getDate(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getDate(columnIndex);
   }
 
+  @TsFileApi
   public LocalDate getDate(int columnIndex) {
     return getField(columnIndex).getDateV();
   }
 
+  @TsFileApi
   public Binary getBinary(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return getBinary(columnIndex);
   }
 
+  @TsFileApi
   public Binary getBinary(int columnIndex) {
     return getField(columnIndex).getBinaryV();
   }
 
+  @TsFileApi
   public boolean isNull(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
     return isNull(columnIndex);
   }
 
+  @TsFileApi
   public boolean isNull(int columnIndex) {
     return getField(columnIndex) == null;
   }
@@ -157,6 +178,7 @@ public class ResultSet {
     return field;
   }
 
+  @TsFileApi
   public void close() {}
 
   public static class ResultSetMetadata {
@@ -176,11 +198,13 @@ public class ResultSet {
     }
 
     // columnIndex starting from 1
+    @TsFileApi
     public String getColumnName(int columnIndex) {
       return columnNameList.get(columnIndex - 1);
     }
 
     // columnIndex starting from 1
+    @TsFileApi
     public TSDataType getColumnType(int columnIndex) {
       return dataTypeList.get(columnIndex - 1);
     }
