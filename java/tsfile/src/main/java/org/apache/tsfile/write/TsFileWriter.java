@@ -524,7 +524,7 @@ public class TsFileWriter implements AutoCloseable {
   public boolean writeRecord(TSRecord record) throws IOException, WriteProcessException {
     MeasurementGroup measurementGroup = getSchema().getSeriesSchema(record.deviceId);
     if (measurementGroup == null) {
-      throw new WriteProcessException("given device is not registered! " + record.deviceId);
+      throw new NoDeviceException(record.deviceId.toString());
     }
     checkIsTimeseriesExist(record, measurementGroup.isAligned());
     recordCount += groupWriters.get(record.deviceId).write(record.time, record.dataPointList);
@@ -543,7 +543,7 @@ public class TsFileWriter implements AutoCloseable {
     IDeviceID deviceID = IDeviceID.Factory.DEFAULT_FACTORY.create(tablet.getDeviceId());
     MeasurementGroup measurementGroup = getSchema().getSeriesSchema(deviceID);
     if (measurementGroup == null) {
-      throw new WriteProcessException("given device is not registered! " + deviceID);
+      throw new NoDeviceException(deviceID.toString());
     }
     // make sure the ChunkGroupWriter for this Tablet exist
     checkIsTimeseriesExist(tablet, measurementGroup.isAligned());
