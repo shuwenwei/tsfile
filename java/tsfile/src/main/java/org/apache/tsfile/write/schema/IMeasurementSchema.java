@@ -90,13 +90,13 @@ public interface IMeasurementSchema {
 
   boolean isLogicalView();
 
-  static List<String> getMeasurementNameList(List<IMeasurementSchema> schemaList) {
+  static List<String> getMeasurementNameList(List<? extends IMeasurementSchema> schemaList) {
     return schemaList.stream()
         .map(IMeasurementSchema::getMeasurementName)
         .collect(Collectors.toList());
   }
 
-  static List<TSDataType> getDataTypeList(List<IMeasurementSchema> schemaList) {
+  static List<TSDataType> getDataTypeList(List<? extends IMeasurementSchema> schemaList) {
     return schemaList.stream().map(IMeasurementSchema::getType).collect(Collectors.toList());
   }
 }

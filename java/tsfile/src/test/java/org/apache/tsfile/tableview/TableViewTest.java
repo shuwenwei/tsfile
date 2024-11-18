@@ -210,12 +210,8 @@ public class TableViewTest {
       Tablet tablet =
           new Tablet(
               tableSchema.getTableName(),
-              tableSchema.getColumnSchemas().stream()
-                  .map(IMeasurementSchema::getMeasurementName)
-                  .collect(Collectors.toList()),
-              tableSchema.getColumnSchemas().stream()
-                  .map(IMeasurementSchema::getType)
-                  .collect(Collectors.toList()),
+              IMeasurementSchema.getMeasurementNameList(tableSchema.getColumnSchemas()),
+              IMeasurementSchema.getDataTypeList(tableSchema.getColumnSchemas()),
               tableSchema.getColumnTypes());
 
       ids =
@@ -495,12 +491,8 @@ public class TableViewTest {
     Tablet tablet =
         new Tablet(
             tableSchema.getTableName(),
-            tableSchema.getColumnSchemas().stream()
-                .map(IMeasurementSchema::getMeasurementName)
-                .collect(Collectors.toList()),
-            tableSchema.getColumnSchemas().stream()
-                .map(IMeasurementSchema::getType)
-                .collect(Collectors.toList()),
+            IMeasurementSchema.getMeasurementNameList(tableSchema.getColumnSchemas()),
+            IMeasurementSchema.getDataTypeList(tableSchema.getColumnSchemas()),
             tableSchema.getColumnTypes());
 
     for (int i = 0; i < deviceNum; i++) {

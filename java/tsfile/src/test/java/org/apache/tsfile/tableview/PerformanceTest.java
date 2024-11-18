@@ -293,10 +293,8 @@ public class PerformanceTest {
     columnCategories.addAll(ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, measurementSchemaCnt));
     return new Tablet(
         null,
-        measurementSchemas.stream()
-            .map(IMeasurementSchema::getMeasurementName)
-            .collect(Collectors.toList()),
-        measurementSchemas.stream().map(IMeasurementSchema::getType).collect(Collectors.toList()),
+        IMeasurementSchema.getMeasurementNameList(measurementSchemas),
+        IMeasurementSchema.getDataTypeList(measurementSchemas),
         columnCategories,
         pointPerSeries);
   }

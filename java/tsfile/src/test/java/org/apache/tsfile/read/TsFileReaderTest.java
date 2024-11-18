@@ -65,7 +65,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.apache.tsfile.read.filter.factory.ValueFilterApi.DEFAULT_MEASUREMENT_INDEX;
 
@@ -613,12 +612,8 @@ public class TsFileReaderTest {
         Tablet tablet =
             new Tablet(
                 tableSchema.getTableName(),
-                tableSchema.getColumnSchemas().stream()
-                    .map(IMeasurementSchema::getMeasurementName)
-                    .collect(Collectors.toList()),
-                tableSchema.getColumnSchemas().stream()
-                    .map(IMeasurementSchema::getType)
-                    .collect(Collectors.toList()),
+                IMeasurementSchema.getMeasurementNameList(tableSchema.getColumnSchemas()),
+                IMeasurementSchema.getDataTypeList(tableSchema.getColumnSchemas()),
                 tableSchema.getColumnTypes());
 
         String[][] ids =
