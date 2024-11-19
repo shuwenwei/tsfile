@@ -75,7 +75,7 @@ public class ResultSetTest {
     try (TsFileWriter writer = new TsFileWriter(tsfile)) {
       writer.registerTimeseries("root.sg1.d1", new MeasurementSchema("s1", TSDataType.BOOLEAN));
       writer.registerTimeseries("root.sg1.d1", new MeasurementSchema("s2", TSDataType.BOOLEAN));
-      writer.write(tablet);
+      writer.writeTree(tablet);
     }
 
     try (TsFileReader tsFileReader = new TsFileReader(tsfile)) {

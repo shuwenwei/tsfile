@@ -19,6 +19,7 @@
 
 package org.apache.tsfile.file.metadata;
 
+import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.compatibility.DeserializeConfig;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.utils.ReadWriteForEncodingUtils;
@@ -65,6 +66,20 @@ public class TableSchema {
     this.tableName = tableName;
     this.columnSchemas = columnSchemas;
     this.columnCategories = columnCategories;
+  }
+
+  @TsFileApi
+  public TableSchema(
+      String tableName,
+      List<String> columnNameList,
+      List<TSDataType> dataTypeList,
+      List<ColumnCategory> categoryList) {
+    this.tableName = tableName;
+    this.columnSchemas = new ArrayList<>(columnNameList.size());
+    for (int i = 0; i < columnNameList.size(); i++) {
+      columnSchemas.add(new MeasurementSchema(columnNameList.get(i), dataTypeList.get(i)));
+    }
+    this.columnCategories = categoryList;
   }
 
   public Map<String, Integer> getColumnPosIndex() {

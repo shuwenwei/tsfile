@@ -123,29 +123,40 @@ public class Tablet {
   }
 
   @TsFileApi
-  public Tablet(String deviceId, List<String> measurementList, List<TSDataType> dataTypeList) {
-    this(deviceId, measurementList, dataTypeList, DEFAULT_SIZE);
+  public Tablet(IDeviceID deviceID, List<String> measurementList, List<TSDataType> dataTypeList) {
+    this(deviceID, measurementList, dataTypeList, DEFAULT_SIZE);
+  }
+
+  @TsFileApi
+  public Tablet(
+      IDeviceID deviceID,
+      List<String> measurementList,
+      List<TSDataType> dataTypeList,
+      int maxRowNumber) {
+    this(
+        deviceID.toString(),
+        measurementList,
+        dataTypeList,
+        ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, measurementList.size()),
+        maxRowNumber);
   }
 
   /**
-   * Return a {@link Tablet} with the specified number of rows (maxBatchSize). Only call this
-   * constructor directly for testing purposes. {@link Tablet} should normally always be default
-   * size.
+   * Return a {@link Tablet} with the specified number of rows (maxBatchSize). Only for writing in
+   * TsFileWriter.
    *
-   * @param deviceId the name of the device specified to be written in
+   * @param tableName the name of the table specified to be written in
    * @param measurementList the list of measurement names for creating the row batch
    * @param dataTypeList the list of {@link TSDataType}s for creating the row batch
    * @param maxRowNum the maximum number of rows for this tablet
    */
   @TsFileApi
   public Tablet(
-      String deviceId, List<String> measurementList, List<TSDataType> dataTypeList, int maxRowNum) {
-    this(
-        deviceId,
-        measurementList,
-        dataTypeList,
-        ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, measurementList.size()),
-        maxRowNum);
+      String tableName,
+      List<String> measurementList,
+      List<TSDataType> dataTypeList,
+      int maxRowNum) {
+    this(tableName, measurementList, dataTypeList, null, maxRowNum, false);
   }
 
   public Tablet(
@@ -156,19 +167,30 @@ public class Tablet {
     this(tableName, measurementList, dataTypeList, columnCategoryList, DEFAULT_SIZE);
   }
 
-  @TsFileApi
   public Tablet(
-      String tableName,
+      String insertTargetName,
       List<String> measurementList,
       List<TSDataType> dataTypeList,
       List<ColumnCategory> columnCategoryList,
       int maxRowNum) {
-    this.insertTargetName = tableName;
+    this(insertTargetName, measurementList, dataTypeList, columnCategoryList, maxRowNum, true);
+  }
+
+  protected Tablet(
+      String insertTargetName,
+      List<String> measurementList,
+      List<TSDataType> dataTypeList,
+      List<ColumnCategory> columnCategoryList,
+      int maxRowNum,
+      boolean hasColumnCategory) {
+    this.insertTargetName = insertTargetName;
     this.schemas = new ArrayList<>(measurementList.size());
     for (int i = 0; i < measurementList.size(); i++) {
       this.schemas.add(new MeasurementSchema(measurementList.get(i), dataTypeList.get(i)));
     }
-    setColumnCategories(columnCategoryList);
+    if (hasColumnCategory) {
+      setColumnCategories(columnCategoryList);
+    }
     this.maxRowNumber = maxRowNum;
     measurementIndex = new HashMap<>();
     constructMeasurementIndexMap();
