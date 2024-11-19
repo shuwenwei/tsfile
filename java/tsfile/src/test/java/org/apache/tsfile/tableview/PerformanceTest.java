@@ -215,7 +215,7 @@ public class PerformanceTest {
             startTime = System.nanoTime();
             tsFileWriter.writeTable(
                 tablet,
-                Collections.singletonList(new Pair<>(tablet.getDeviceID(0), tablet.rowSize)));
+                Collections.singletonList(new Pair<>(tablet.getDeviceID(0), tablet.getRowSize())));
             writeTimeSum += System.nanoTime() - startTime;
           }
         }
@@ -282,7 +282,7 @@ public class PerformanceTest {
     for (int valNum = 0; valNum < pointPerSeries; valNum++) {
       tablet.timestamps[valNum] = (long) tabletNum * pointPerSeries + valNum;
     }
-    tablet.rowSize = pointPerSeries;
+    tablet.setRowSize(pointPerSeries);
   }
 
   private Tablet initTableTablet() {
@@ -317,7 +317,7 @@ public class PerformanceTest {
     for (int valNum = 0; valNum < pointPerSeries; valNum++) {
       tablet.timestamps[valNum] = (long) tabletNum * pointPerSeries + valNum;
     }
-    tablet.rowSize = pointPerSeries;
+    tablet.setRowSize(pointPerSeries);
   }
 
   private void registerTree(TsFileWriter writer) throws WriteProcessException {

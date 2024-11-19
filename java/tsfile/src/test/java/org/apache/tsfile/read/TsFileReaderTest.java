@@ -635,7 +635,7 @@ public class TsFileReaderTest {
               new StringArrayDeviceID(tableSchema.getTableName(), ids[i][0], ids[i][1], ids[i][2]));
           tablet.addValue("s1", i, i);
         }
-        tablet.rowSize = ids.length;
+        tablet.setRowSize(ids.length);
         writer.writeTable(tablet);
       }
       try (TsFileReader tsFileReader = new TsFileReader(file)) {

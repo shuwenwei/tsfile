@@ -232,7 +232,7 @@ public class TsFileTool {
           }
         }
       }
-      tablet.rowSize = num;
+      tablet.setRowSize(num);
       return tablet;
     } catch (Exception e) {
       LOGGER.error("Failed to parse csv file", e);

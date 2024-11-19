@@ -231,7 +231,7 @@ public class TableViewTest {
         tablet.addValue("id3", i, ids[i][2]);
         tablet.addValue("s1", i, i);
       }
-      tablet.rowSize = ids.length;
+      tablet.setRowSize(ids.length);
       writer.writeTable(tablet);
     }
 
@@ -465,7 +465,7 @@ public class TableViewTest {
 
       List<Path> selectedSeries = new ArrayList<>();
       Set<IDeviceID> deviceIDS = new HashSet<>();
-      for (int i = 0; i < tablet.rowSize; i++) {
+      for (int i = 0; i < tablet.getRowSize(); i++) {
         final IDeviceID tabletDeviceID = tablet.getDeviceID(i);
         if (!deviceIDS.contains(tabletDeviceID)) {
           deviceIDS.add(tabletDeviceID);
@@ -507,7 +507,7 @@ public class TableViewTest {
         }
       }
     }
-    tablet.rowSize = deviceNum * numTimestampPerDevice;
+    tablet.setRowSize(deviceNum * numTimestampPerDevice);
     return tablet;
   }
 
