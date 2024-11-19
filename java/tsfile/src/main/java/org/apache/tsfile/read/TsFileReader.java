@@ -121,10 +121,12 @@ public class TsFileReader implements AutoCloseable {
   }
 
   @TsFileApi
-  public ResultSet query(List<String> pathList, long startTime, long endTime) throws IOException {
+  public ResultSet query(List<TimeSeries> pathList, long startTime, long endTime)
+      throws IOException {
     QueryExpression queryExpression = QueryExpression.create();
-    for (String path : pathList) {
-      queryExpression.addSelectedPath(new Path(path, true));
+    for (TimeSeries path : pathList) {
+      queryExpression.addSelectedPath(
+          new Path(path.getDeviceId(), path.getMeasurementName(), false));
     }
     queryExpression.setExpression(
         new GlobalTimeExpression(new TimeFilterOperators.TimeBetweenAnd(startTime, endTime)));
@@ -142,5 +144,39 @@ public class TsFileReader implements AutoCloseable {
   @TsFileApi
   public void close() throws IOException {
     fileReader.close();
+  }
+
+  public static class TimeSeries {
+    private IDeviceID deviceId;
+    private String measurementName;
+
+    public TimeSeries(IDeviceID deviceId, String measurementName) {
+      this.deviceId = deviceId;
+      this.measurementName = measurementName;
+    }
+
+    public IDeviceID getDeviceId() {
+      return deviceId;
+    }
+
+    public void setDeviceId(IDeviceID deviceId) {
+      this.deviceId = deviceId;
+    }
+
+    public String getMeasurementName() {
+      return measurementName;
+    }
+
+    public void setMeasurementName(String measurementName) {
+      this.measurementName = measurementName;
+    }
+
+    public static List<TimeSeries> getPathList(IDeviceID deviceId, String... measurements) {
+      List<TimeSeries> pathList = new ArrayList<>(measurements.length);
+      for (String measurement : measurements) {
+        pathList.add(new TimeSeries(deviceId, measurement));
+      }
+      return pathList;
+    }
   }
 }

@@ -21,6 +21,7 @@ package org.apache.tsfile.read.query;
 
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.exception.write.WriteProcessException;
+import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.read.TsFileReader;
 import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
@@ -82,7 +83,8 @@ public class ResultSetTest {
       // s1 s2 s3 s4
       ResultSet resultSet =
           tsFileReader.query(
-              Arrays.asList("root.sg1.d1.s1", "root.sg1.d1.s2", "root.sg1.d1.s3", "root.sg1.d1.s4"),
+              TsFileReader.TimeSeries.getPathList(
+                  IDeviceID.Factory.DEFAULT_FACTORY.create("root.sg1.d1"), "s1", "s2", "s3", "s4"),
               0,
               2);
       ResultSet.ResultSetMetadata resultSetMetadata = resultSet.getMetadata();
