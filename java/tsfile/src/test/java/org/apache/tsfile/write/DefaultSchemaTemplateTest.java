@@ -63,6 +63,7 @@ public class DefaultSchemaTemplateTest {
       schema.put("s2", s2);
 
       writer.registerSchemaTemplate("defaultTemplate", schema, false);
+      writer.registerDevice("d1", "defaultTemplate");
 
       Tablet tablet = new Tablet("d1", schemaList);
       long[] timestamps = tablet.timestamps;

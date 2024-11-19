@@ -112,7 +112,7 @@ public class Tablet {
 
   public Tablet(String deviceId, List<IMeasurementSchema> schemas, int maxRowNumber) {
     this.insertTargetName = deviceId;
-    this.schemas = schemas;
+    this.schemas = new ArrayList<>(schemas);
     setColumnCategories(ColumnCategory.nCopy(ColumnCategory.MEASUREMENT, schemas.size()));
     this.maxRowNumber = maxRowNumber;
     measurementIndex = new HashMap<>();
