@@ -118,4 +118,20 @@ public class DeviceTableModelWriter extends CommonModelWriter {
     }
     tablet.setColumnCategories(columnCategoryListForTablet);
   }
+
+  public boolean isTableWriteAligned() {
+    return isTableWriteAligned;
+  }
+
+  public void setTableWriteAligned(boolean tableWriteAligned) {
+    isTableWriteAligned = tableWriteAligned;
+  }
+
+  public void registerTableSchema(TableSchema tableSchema) {
+    getSchema().registerTableSchema(tableSchema);
+  }
+
+  public void setGenerateTableSchema(boolean generateTableSchema) {
+    this.getIOWriter().setGenerateTableSchema(generateTableSchema);
+  }
 }

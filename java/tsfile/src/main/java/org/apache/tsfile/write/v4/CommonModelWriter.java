@@ -25,14 +25,10 @@ import org.apache.tsfile.common.conf.TSFileDescriptor;
 import org.apache.tsfile.encrypt.EncryptParameter;
 import org.apache.tsfile.encrypt.IEncryptor;
 import org.apache.tsfile.exception.encrypt.EncryptException;
-import org.apache.tsfile.exception.write.NoMeasurementException;
 import org.apache.tsfile.file.metadata.IDeviceID;
-import org.apache.tsfile.utils.MeasurementGroup;
 import org.apache.tsfile.write.chunk.AlignedChunkGroupWriterImpl;
 import org.apache.tsfile.write.chunk.IChunkGroupWriter;
 import org.apache.tsfile.write.chunk.NonAlignedChunkGroupWriterImpl;
-import org.apache.tsfile.write.record.datapoint.DataPoint;
-import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.schema.Schema;
 import org.apache.tsfile.write.writer.RestorableTsFileIOWriter;
 import org.apache.tsfile.write.writer.TsFileIOWriter;
@@ -54,7 +50,7 @@ import java.util.TreeMap;
 class CommonModelWriter implements AutoCloseable {
 
   protected static final TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
-  private static final Logger LOG = LoggerFactory.getLogger(CommonModelWriter.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(CommonModelWriter.class);
 
   /** IO writer of this TsFile. */
   protected final TsFileIOWriter fileWriter;

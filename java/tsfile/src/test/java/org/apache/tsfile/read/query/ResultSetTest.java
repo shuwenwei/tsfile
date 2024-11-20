@@ -20,18 +20,18 @@
 package org.apache.tsfile.read.query;
 
 import org.apache.tsfile.enums.TSDataType;
-import org.apache.tsfile.exception.read.ReadProcessException;
-import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.TableSchema;
-import org.apache.tsfile.read.TsFileReader;
 import org.apache.tsfile.read.common.TimeSeries;
 import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.read.query.dataset.ResultSetMetadata;
+import org.apache.tsfile.read.v4.DeviceTableModelReader;
+import org.apache.tsfile.read.v4.PointTreeModelReader;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
-import org.apache.tsfile.write.TsFileWriter;
 import org.apache.tsfile.write.record.Tablet;
 import org.apache.tsfile.write.schema.MeasurementSchema;
+import org.apache.tsfile.write.v4.DeviceTableModelWriter;
+import org.apache.tsfile.write.v4.PointTreeModelWriter;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -64,7 +64,7 @@ public class ResultSetTest {
   }
 
   @Test
-  public void testQueryTree() throws IOException, WriteProcessException {
+  public void testQueryTree() throws Exception {
     Tablet tablet =
         new Tablet(
             "root.sg1.d1",
@@ -77,13 +77,13 @@ public class ResultSetTest {
     tablet.addTimestamp(1, 2);
     tablet.addValue("s2", 1, true);
 
-    try (TsFileWriter writer = new TsFileWriter(tsfile)) {
+    try (PointTreeModelWriter writer = new PointTreeModelWriter(tsfile)) {
       writer.registerTimeseries("root.sg1.d1", new MeasurementSchema("s1", TSDataType.BOOLEAN));
       writer.registerTimeseries("root.sg1.d1", new MeasurementSchema("s2", TSDataType.BOOLEAN));
       writer.writeTree(tablet);
     }
 
-    try (TsFileReader tsFileReader = new TsFileReader(tsfile)) {
+    try (PointTreeModelReader tsFileReader = new PointTreeModelReader(tsfile)) {
       // s1 s2 s3 s4
       ResultSet resultSet =
           tsFileReader.query(
@@ -112,7 +112,7 @@ public class ResultSetTest {
   }
 
   @Test
-  public void testQueryTable() throws IOException, WriteProcessException, ReadProcessException {
+  public void testQueryTable() throws Exception {
     TableSchema tableSchema =
         new TableSchema(
             "t1",
@@ -145,12 +145,12 @@ public class ResultSetTest {
 
     tablet.addTimestamp(2, 2);
 
-    try (TsFileWriter writer = new TsFileWriter(tsfile)) {
+    try (DeviceTableModelWriter writer = new DeviceTableModelWriter(tsfile)) {
       writer.registerTableSchema(tableSchema);
       writer.writeTable(tablet);
     }
 
-    try (TsFileReader tsFileReader = new TsFileReader(tsfile)) {
+    try (DeviceTableModelReader tsFileReader = new DeviceTableModelReader(tsfile)) {
       // id1 id2 s2 s1
       ResultSet resultSet =
           tsFileReader.queryTable("t1", Arrays.asList("id1", "id2", "s2", "s1"), null, 0, 2);

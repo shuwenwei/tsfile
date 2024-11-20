@@ -278,4 +278,7 @@ public class PointTreeModelWriter extends CommonModelWriter {
     return schemas;
   }
 
+  public boolean isGenerateTableSchemaForTree() {
+    return getIOWriter().isGenerateTableSchema();
+  }
 }
