@@ -58,7 +58,6 @@ public class SingleDeviceTsBlockReader implements TsBlockReader {
   private boolean lastBlockReturned = true;
   private final Map<String, MeasurementColumnContext> measureColumnContextMap;
   private final Map<String, IdColumnContext> idColumnContextMap;
-  private boolean isTable;
 
   private long nextTime;
 
