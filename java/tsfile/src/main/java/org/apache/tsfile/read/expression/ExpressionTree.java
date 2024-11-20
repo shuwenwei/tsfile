@@ -54,18 +54,18 @@ public interface ExpressionTree {
   }
 
   class IdColumnMatch implements ExpressionTree {
-    private Set<IDeviceID> satisfiedDeviceIdList;
+    private Set<IDeviceID> satisfiedDeviceIds;
 
     public IdColumnMatch(List<IDeviceID> satisfiedDeviceIdList) {
-      this.satisfiedDeviceIdList =
+      this.satisfiedDeviceIds =
           satisfiedDeviceIdList == null ? null : new HashSet<>(satisfiedDeviceIdList);
     }
 
     @Override
     public boolean satisfy(Object value) {
-      return satisfiedDeviceIdList == null
-          || satisfiedDeviceIdList.isEmpty()
-          || satisfiedDeviceIdList.contains(value);
+      return satisfiedDeviceIds == null
+          || satisfiedDeviceIds.isEmpty()
+          || satisfiedDeviceIds.contains(value);
     }
 
     @Override
