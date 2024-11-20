@@ -506,14 +506,13 @@ public class Tablet {
     int columnIndex = 0;
     for (int i = 0; i < schemas.size(); i++) {
       IMeasurementSchema schema = schemas.get(i);
-      ColumnCategory columnCategory = columnCategories.get(i);
       TSDataType dataType = schema.getType();
-      values[columnIndex] = createValueColumnOfDataType(dataType, columnCategory);
+      values[columnIndex] = createValueColumnOfDataType(dataType);
       columnIndex++;
     }
   }
 
-  private Object createValueColumnOfDataType(TSDataType dataType, ColumnCategory columnCategory) {
+  private Object createValueColumnOfDataType(TSDataType dataType) {
 
     Object valueColumn;
     switch (dataType) {

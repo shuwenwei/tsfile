@@ -21,14 +21,12 @@ package org.apache.tsfile.read.query.dataset;
 
 import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.read.common.Path;
-import org.apache.tsfile.read.common.RowRecord;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class TreeResultSet extends ResultSet {
   private QueryDataSet queryDataSet;
-  private RowRecord currentRow;
 
   public TreeResultSet(QueryDataSet queryDataSet) {
     super(

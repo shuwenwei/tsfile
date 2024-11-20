@@ -172,8 +172,8 @@ public class TsFileReader implements AutoCloseable {
         tableQueryExecutor.query(
             tableName,
             columnNames,
-            new ExpressionTree.TimeBetween(startTime, endTime),
-            new ExpressionTree.IdColumn(deviceIds),
+            new ExpressionTree.TimeBetweenAnd(startTime, endTime),
+            new ExpressionTree.IdColumnMatch(deviceIds),
             null);
     return new TableResultSet(tsBlockReader, columnNames, dataTypeList);
   }

@@ -32,11 +32,11 @@ public interface ExpressionTree {
 
   Filter toFilter();
 
-  class TimeBetween implements ExpressionTree {
+  class TimeBetweenAnd implements ExpressionTree {
     private long startTime;
     private long endTime;
 
-    public TimeBetween(long startTime, long endTime) {
+    public TimeBetweenAnd(long startTime, long endTime) {
       this.startTime = startTime;
       this.endTime = endTime;
     }
@@ -53,11 +53,12 @@ public interface ExpressionTree {
     }
   }
 
-  class IdColumn implements ExpressionTree {
+  class IdColumnMatch implements ExpressionTree {
     private Set<IDeviceID> satisfiedDeviceIdList;
 
-    public IdColumn(List<IDeviceID> satisfiedDeviceIdList) {
-      this.satisfiedDeviceIdList = new HashSet<>(satisfiedDeviceIdList);
+    public IdColumnMatch(List<IDeviceID> satisfiedDeviceIdList) {
+      this.satisfiedDeviceIdList =
+          satisfiedDeviceIdList == null ? null : new HashSet<>(satisfiedDeviceIdList);
     }
 
     @Override

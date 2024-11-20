@@ -58,6 +58,7 @@ public class SingleDeviceTsBlockReader implements TsBlockReader {
   private boolean lastBlockReturned = true;
   private final Map<String, MeasurementColumnContext> measureColumnContextMap;
   private final Map<String, IdColumnContext> idColumnContextMap;
+  private boolean isTable;
 
   private long nextTime;
 
@@ -105,7 +106,7 @@ public class SingleDeviceTsBlockReader implements TsBlockReader {
     }
     final IChunkMetadata chunkMetadata = chunkMetadataList.get(0);
     AbstractFileSeriesReader seriesReader =
-        new FileSeriesReader(chunkLoader, chunkMetadataList, timeFilter);
+        new FileSeriesReader(chunkLoader, chunkMetadataList, timeFilter, false);
     if (seriesReader.hasNextBatch()) {
       if (chunkMetadata instanceof AlignedChunkMetadata) {
         final List<String> currentChunkMeasurementNames =
