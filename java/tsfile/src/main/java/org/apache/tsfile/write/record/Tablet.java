@@ -598,12 +598,12 @@ public class Tablet {
     if (bitMaps != null) {
       int size = (schemas == null ? 0 : schemas.size());
       for (int i = 0; i < size; i++) {
-        if (bitMaps[i] == null) {
+        if (bitMaps[i] == null || bitMaps[i].isAllUnmarked(rowSize)) {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(false), stream);
         } else {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(true), stream);
-          ReadWriteIOUtils.write(bitMaps[i].getSize(), stream);
-          ReadWriteIOUtils.write(new Binary(bitMaps[i].getByteArray()), stream);
+          ReadWriteIOUtils.write(bitMaps[i].getTruncatedSize(rowSize), stream);
+          ReadWriteIOUtils.write(new Binary(bitMaps[i].getTruncatedByteArray(rowSize)), stream);
         }
       }
     }
