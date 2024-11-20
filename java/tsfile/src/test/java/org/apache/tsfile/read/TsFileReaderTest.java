@@ -22,6 +22,7 @@ package org.apache.tsfile.read;
 import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.common.conf.TSFileDescriptor;
 import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.exception.read.ReadProcessException;
 import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.AlignedChunkMetadata;
 import org.apache.tsfile.file.metadata.IChunkMetadata;
@@ -589,7 +590,8 @@ public class TsFileReaderTest {
   }
 
   @Test
-  public void testGetTableDeviceMethods() throws IOException, WriteProcessException {
+  public void testGetTableDeviceMethods()
+      throws IOException, WriteProcessException, ReadProcessException {
     String filePath = TsFileGeneratorForTest.getTestTsFilePath("root.testsg", 0, 0, 0);
     try {
       File file = TsFileGeneratorUtils.generateAlignedTsFile(filePath, 5, 1, 10, 1, 1, 10, 100);

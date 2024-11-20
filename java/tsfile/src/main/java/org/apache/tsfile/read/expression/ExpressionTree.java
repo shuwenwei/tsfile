@@ -19,10 +19,57 @@
 
 package org.apache.tsfile.read.expression;
 
+import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.read.filter.basic.Filter;
+import org.apache.tsfile.read.filter.factory.TimeFilterApi;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public interface ExpressionTree {
   boolean satisfy(Object value);
 
   Filter toFilter();
+
+  class TimeBetween implements ExpressionTree {
+    private long startTime;
+    private long endTime;
+
+    public TimeBetween(long startTime, long endTime) {
+      this.startTime = startTime;
+      this.endTime = endTime;
+    }
+
+    @Override
+    public boolean satisfy(Object value) {
+      long v = (Long) value;
+      return v >= startTime && v <= endTime;
+    }
+
+    @Override
+    public Filter toFilter() {
+      return TimeFilterApi.between(startTime, endTime);
+    }
+  }
+
+  class IdColumn implements ExpressionTree {
+    private Set<IDeviceID> satisfiedDeviceIdList;
+
+    public IdColumn(List<IDeviceID> satisfiedDeviceIdList) {
+      this.satisfiedDeviceIdList = new HashSet<>(satisfiedDeviceIdList);
+    }
+
+    @Override
+    public boolean satisfy(Object value) {
+      return satisfiedDeviceIdList == null
+          || satisfiedDeviceIdList.isEmpty()
+          || satisfiedDeviceIdList.contains(value);
+    }
+
+    @Override
+    public Filter toFilter() {
+      return null;
+    }
+  }
 }

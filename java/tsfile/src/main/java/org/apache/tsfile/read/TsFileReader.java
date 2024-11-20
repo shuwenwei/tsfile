@@ -20,6 +20,10 @@
 package org.apache.tsfile.read;
 
 import org.apache.tsfile.common.TsFileApi;
+import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.exception.read.ReadProcessException;
+import org.apache.tsfile.exception.write.NoMeasurementException;
+import org.apache.tsfile.exception.write.NoTableException;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
@@ -30,12 +34,17 @@ import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
 import org.apache.tsfile.read.controller.IChunkLoader;
 import org.apache.tsfile.read.controller.IMetadataQuerier;
 import org.apache.tsfile.read.controller.MetadataQuerierByFileImpl;
+import org.apache.tsfile.read.expression.ExpressionTree;
 import org.apache.tsfile.read.expression.QueryExpression;
 import org.apache.tsfile.read.expression.impl.GlobalTimeExpression;
 import org.apache.tsfile.read.filter.operator.TimeFilterOperators;
 import org.apache.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.tsfile.read.query.dataset.ResultSet;
+import org.apache.tsfile.read.query.dataset.TableResultSet;
+import org.apache.tsfile.read.query.dataset.TreeResultSet;
+import org.apache.tsfile.read.query.executor.TableQueryExecutor;
 import org.apache.tsfile.read.query.executor.TsFileExecutor;
+import org.apache.tsfile.read.reader.block.TsBlockReader;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.schema.MeasurementSchema;
 
@@ -52,7 +61,8 @@ public class TsFileReader implements AutoCloseable {
   private TsFileSequenceReader fileReader;
   private IMetadataQuerier metadataQuerier;
   private IChunkLoader chunkLoader;
-  private TsFileExecutor tsFileExecutor;
+  private TsFileExecutor treeQueryExecutor;
+  private TableQueryExecutor tableQueryExecutor;
 
   @TsFileApi
   public TsFileReader(File file) throws IOException {
@@ -64,7 +74,10 @@ public class TsFileReader implements AutoCloseable {
     this.fileReader = fileReader;
     this.metadataQuerier = new MetadataQuerierByFileImpl(fileReader);
     this.chunkLoader = new CachedChunkLoaderImpl(fileReader);
-    tsFileExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
+    this.treeQueryExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
+    this.tableQueryExecutor =
+        new TableQueryExecutor(
+            metadataQuerier, chunkLoader, TableQueryExecutor.TableQueryOrdering.DEVICE);
   }
 
   @TsFileApi
@@ -117,11 +130,11 @@ public class TsFileReader implements AutoCloseable {
 
   @Deprecated
   public QueryDataSet query(QueryExpression queryExpression) throws IOException {
-    return tsFileExecutor.execute(queryExpression);
+    return treeQueryExecutor.execute(queryExpression);
   }
 
   @TsFileApi
-  public ResultSet query(List<TimeSeries> pathList, long startTime, long endTime)
+  public TreeResultSet query(List<TimeSeries> pathList, long startTime, long endTime)
       throws IOException {
     QueryExpression queryExpression = QueryExpression.create();
     for (TimeSeries path : pathList) {
@@ -130,14 +143,46 @@ public class TsFileReader implements AutoCloseable {
     }
     queryExpression.setExpression(
         new GlobalTimeExpression(new TimeFilterOperators.TimeBetweenAnd(startTime, endTime)));
-    return new ResultSet(tsFileExecutor.execute(queryExpression));
+    return new TreeResultSet(treeQueryExecutor.execute(queryExpression));
+  }
+
+  @TsFileApi
+  public ResultSet queryTable(
+      String tableName,
+      List<String> columnNames,
+      List<IDeviceID> deviceIds,
+      long startTime,
+      long endTime)
+      throws ReadProcessException, IOException, NoTableException, NoMeasurementException {
+    TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
+    TableSchema tableSchema = tsFileMetadata.getTableSchemaMap().get(tableName);
+    if (tableSchema == null) {
+      throw new NoTableException(tableName);
+    }
+    List<TSDataType> dataTypeList = new ArrayList<>(columnNames.size());
+    for (String columnName : columnNames) {
+      Map<String, Integer> column2IndexMap = tableSchema.buildColumnPosIndex();
+      Integer columnIndex = column2IndexMap.get(columnName);
+      if (columnIndex == null) {
+        throw new NoMeasurementException(columnName);
+      }
+      dataTypeList.add(tableSchema.getColumnSchemas().get(columnIndex).getType());
+    }
+    TsBlockReader tsBlockReader =
+        tableQueryExecutor.query(
+            tableName,
+            columnNames,
+            new ExpressionTree.TimeBetween(startTime, endTime),
+            new ExpressionTree.IdColumn(deviceIds),
+            null);
+    return new TableResultSet(tsBlockReader, columnNames, dataTypeList);
   }
 
   @Deprecated
   public QueryDataSet query(
       QueryExpression queryExpression, long partitionStartOffset, long partitionEndOffset)
       throws IOException {
-    return tsFileExecutor.execute(queryExpression, partitionStartOffset, partitionEndOffset);
+    return treeQueryExecutor.execute(queryExpression, partitionStartOffset, partitionEndOffset);
   }
 
   @Override

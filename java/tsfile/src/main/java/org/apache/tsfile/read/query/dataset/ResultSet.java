@@ -22,28 +22,24 @@ package org.apache.tsfile.read.query.dataset;
 import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.read.common.Field;
-import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.common.RowRecord;
 import org.apache.tsfile.utils.Binary;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResultSet {
-  private QueryDataSet queryDataSet;
-  private ResultSetMetadata resultSetMetadata;
-  private RowRecord currentRow;
-  private Map<String, Integer> columnNameToColumnIndexMap;
+public abstract class ResultSet {
 
-  public ResultSet(QueryDataSet queryDataSet) {
-    this.queryDataSet = queryDataSet;
-    // add Time column at first position
-    this.resultSetMetadata =
-        new ResultSetMetadata(queryDataSet.getPaths(), queryDataSet.getDataTypes());
+  protected ResultSetMetadata resultSetMetadata;
+  protected Map<String, Integer> columnNameToColumnIndexMap;
+  protected RowRecord currentRow;
+
+  protected ResultSet(List<String> columnNameList, List<TSDataType> tsDataTypeList) {
+    // Add Time at first column
+    this.resultSetMetadata = new ResultSetMetadata(columnNameList, tsDataTypeList);
     this.columnNameToColumnIndexMap = new HashMap<>(resultSetMetadata.getColumnNum());
     for (int columnIndex = 1; columnIndex <= resultSetMetadata.getColumnNum(); columnIndex++) {
       this.columnNameToColumnIndexMap.put(
@@ -57,16 +53,7 @@ public class ResultSet {
   }
 
   @TsFileApi
-  public boolean next() throws IOException {
-    while (queryDataSet.hasNext()) {
-      currentRow = queryDataSet.next();
-      if (currentRow.isAllNull()) {
-        continue;
-      }
-      return true;
-    }
-    return false;
-  }
+  public abstract boolean next() throws IOException;
 
   @TsFileApi
   public int getInt(String columnName) {
@@ -179,38 +166,5 @@ public class ResultSet {
   }
 
   @TsFileApi
-  public void close() {}
-
-  public static class ResultSetMetadata {
-
-    private List<String> columnNameList;
-    private List<TSDataType> dataTypeList;
-
-    public ResultSetMetadata(List<Path> paths, List<TSDataType> dataTypeList) {
-      this.columnNameList = new ArrayList<>(paths.size() + 1);
-      this.dataTypeList = new ArrayList<>(paths.size() + 1);
-      // add time column
-      this.columnNameList.add("Time");
-      this.dataTypeList.add(TSDataType.INT64);
-      // add other columns
-      paths.forEach(path -> columnNameList.add(path.getFullPath()));
-      this.dataTypeList.addAll(dataTypeList);
-    }
-
-    // columnIndex starting from 1
-    @TsFileApi
-    public String getColumnName(int columnIndex) {
-      return columnNameList.get(columnIndex - 1);
-    }
-
-    // columnIndex starting from 1
-    @TsFileApi
-    public TSDataType getColumnType(int columnIndex) {
-      return dataTypeList.get(columnIndex - 1);
-    }
-
-    public int getColumnNum() {
-      return dataTypeList.size();
-    }
-  }
+  public abstract void close();
 }

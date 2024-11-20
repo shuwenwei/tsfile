@@ -89,6 +89,21 @@ public class TableSchema {
     return columnPosIndex;
   }
 
+  // Only for deserialized TableSchema
+  public Map<String, Integer> buildColumnPosIndex() {
+    if (columnPosIndex == null) {
+      columnPosIndex = new HashMap<>();
+    }
+    if (columnPosIndex.size() >= columnSchemas.size()) {
+      return columnPosIndex;
+    }
+    for (int i = 0; i < columnSchemas.size(); i++) {
+      IMeasurementSchema currentColumnSchema = columnSchemas.get(i);
+      columnPosIndex.putIfAbsent(currentColumnSchema.getMeasurementName(), i);
+    }
+    return columnPosIndex;
+  }
+
   public Map<String, Integer> getIdColumnOrder() {
     if (idColumnOrder == null) {
       idColumnOrder = new HashMap<>();
