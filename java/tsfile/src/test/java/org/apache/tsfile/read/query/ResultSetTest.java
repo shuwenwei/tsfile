@@ -25,9 +25,9 @@ import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.TableSchema;
 import org.apache.tsfile.read.TsFileReader;
+import org.apache.tsfile.read.common.TimeSeries;
 import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.read.query.dataset.ResultSetMetadata;
-import org.apache.tsfile.read.query.dataset.TreeResultSet;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
 import org.apache.tsfile.write.TsFileWriter;
 import org.apache.tsfile.write.record.Tablet;
@@ -85,9 +85,9 @@ public class ResultSetTest {
 
     try (TsFileReader tsFileReader = new TsFileReader(tsfile)) {
       // s1 s2 s3 s4
-      TreeResultSet resultSet =
+      ResultSet resultSet =
           tsFileReader.query(
-              TsFileReader.TimeSeries.getPathList(
+              TimeSeries.getPathList(
                   IDeviceID.Factory.DEFAULT_FACTORY.create("root.sg1.d1"), "s1", "s2", "s3", "s4"),
               0,
               2);
