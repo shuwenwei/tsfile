@@ -31,17 +31,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-class AbstractModelReader implements AutoCloseable {
+class CommonModelReader implements AutoCloseable {
 
   protected TsFileSequenceReader fileReader;
   protected IMetadataQuerier metadataQuerier;
   protected IChunkLoader chunkLoader;
 
-  public AbstractModelReader(File file) throws IOException {
+  public CommonModelReader(File file) throws IOException {
     this(new TsFileSequenceReader(file.getPath()));
   }
 
-  public AbstractModelReader(TsFileSequenceReader fileReader) throws IOException {
+  public CommonModelReader(TsFileSequenceReader fileReader) throws IOException {
     this.fileReader = fileReader;
     this.metadataQuerier = new MetadataQuerierByFileImpl(fileReader);
     this.chunkLoader = new CachedChunkLoaderImpl(fileReader);

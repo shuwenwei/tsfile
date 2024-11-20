@@ -20,11 +20,10 @@
 package org.apache.tsfile.read;
 
 import org.apache.tsfile.enums.TSDataType;
-import org.apache.tsfile.exception.read.ReadProcessException;
-import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.StringArrayDeviceID;
 import org.apache.tsfile.file.metadata.TableSchema;
+import org.apache.tsfile.read.v4.DeviceTableModelReader;
 import org.apache.tsfile.read.v4.PointTreeModelReader;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
 import org.apache.tsfile.utils.TsFileGeneratorUtils;
@@ -37,7 +36,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -73,8 +71,7 @@ public class TsFileV4ReadWriteInterfacesTest {
   }
 
   @Test
-  public void testGetTableDeviceMethods()
-      throws IOException, WriteProcessException, ReadProcessException {
+  public void testGetTableDeviceMethods() throws Exception {
     String filePath = TsFileGeneratorForTest.getTestTsFilePath("root.testsg", 0, 0, 0);
     try {
       File file = TsFileGeneratorUtils.generateAlignedTsFile(filePath, 5, 1, 10, 1, 1, 10, 100);
@@ -123,7 +120,7 @@ public class TsFileV4ReadWriteInterfacesTest {
         tablet.setRowSize(ids.length);
         writer.writeTable(tablet);
       }
-      try (TsFileReader tsFileReader = new TsFileReader(file)) {
+      try (DeviceTableModelReader tsFileReader = new DeviceTableModelReader(file)) {
         Assert.assertEquals(
             new HashSet<>(deviceIDList), new HashSet<>(tsFileReader.getAllTableDevices("t1")));
         Assert.assertEquals("t1", tsFileReader.getAllTables().get(0));

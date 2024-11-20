@@ -41,7 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class DeviceTableModelReader extends AbstractModelReader {
+public class DeviceTableModelReader extends CommonModelReader {
   protected TableQueryExecutor queryExecutor;
 
   public DeviceTableModelReader(File file) throws IOException {
