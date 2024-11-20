@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PointTreeModelReader extends AbstractModelReader {
+class PointTreeModelReader extends AbstractModelReader {
 
   protected TsFileExecutor queryExecutor;
 

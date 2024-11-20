@@ -21,16 +21,19 @@ package org.apache.tsfile.write.v4;
 
 import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.exception.write.NoDeviceException;
+import org.apache.tsfile.exception.write.NoMeasurementException;
 import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.utils.MeasurementGroup;
 import org.apache.tsfile.write.chunk.IChunkGroupWriter;
 import org.apache.tsfile.write.record.TSRecord;
 import org.apache.tsfile.write.record.Tablet;
+import org.apache.tsfile.write.record.datapoint.DataPoint;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PointTreeModelWriter extends CommonModelWriter {
@@ -219,4 +222,60 @@ public class PointTreeModelWriter extends CommonModelWriter {
     recordCount += groupWriters.get(deviceID).write(tablet);
     return checkMemorySizeAndMayFlushChunks();
   }
+
+  /**
+   * If it's aligned, then all measurementSchemas should be contained in the measurementGroup, or it
+   * will throw exception. If it's nonAligned, then remove the measurementSchema that is not
+   * contained in the measurementGroup.
+   */
+  private void checkIsAllMeasurementsInGroup(
+      MeasurementGroup measurementGroup,
+      List<IMeasurementSchema> measurementSchemas,
+      boolean isAligned)
+      throws NoMeasurementException {
+    if (isAligned && !measurementGroup.isAligned()) {
+      throw new NoMeasurementException("aligned");
+    } else if (!isAligned && measurementGroup.isAligned()) {
+      throw new NoMeasurementException("nonAligned");
+    }
+    for (IMeasurementSchema measurementSchema : measurementSchemas) {
+      if (!measurementGroup
+          .getMeasurementSchemaMap()
+          .containsKey(measurementSchema.getMeasurementName())) {
+        if (isAligned) {
+          throw new NoMeasurementException(measurementSchema.getMeasurementName());
+        } else {
+          measurementSchemas.remove(measurementSchema);
+        }
+      }
+    }
+  }
+
+  /** Check whether all measurements of dataPoints list are in the measurementGroup. */
+  private List<IMeasurementSchema> checkIsAllMeasurementsInGroup(
+      List<DataPoint> dataPoints, MeasurementGroup measurementGroup, boolean isAligned)
+      throws NoMeasurementException {
+    if (isAligned && !measurementGroup.isAligned()) {
+      throw new NoMeasurementException("aligned");
+    } else if (!isAligned && measurementGroup.isAligned()) {
+      throw new NoMeasurementException("nonAligned");
+    }
+    List<IMeasurementSchema> schemas = new ArrayList<>();
+    for (DataPoint dataPoint : dataPoints) {
+      if (!measurementGroup.getMeasurementSchemaMap().containsKey(dataPoint.getMeasurementId())) {
+        if (isAligned) {
+          throw new NoMeasurementException(dataPoint.getMeasurementId());
+        } else {
+          LOG.warn(
+              "Ignore nonAligned measurement "
+                  + dataPoint.getMeasurementId()
+                  + " , because it is not registered or in the default template");
+        }
+      } else {
+        schemas.add(measurementGroup.getMeasurementSchemaMap().get(dataPoint.getMeasurementId()));
+      }
+    }
+    return schemas;
+  }
+
 }
