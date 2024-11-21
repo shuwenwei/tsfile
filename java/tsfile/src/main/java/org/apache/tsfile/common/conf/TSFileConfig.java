@@ -108,11 +108,23 @@ public class TSFileConfig implements Serializable {
    */
   private String timeEncoding = "TS_2DIFF";
 
-  /**
-   * Encoder of TIMESTAMP column, TsFile supports TS_2DIFF, PLAIN and RLE(run-length encoding)
-   * Default value is TS_2DIFF.
-   */
-  private String timestampValueEncoder = "TS_2DIFF";
+  /** Encoder of boolean column. Default value is RLE. */
+  private String booleanEncoding = "RLE";
+
+  /** Encoder of int32 and date column. Default value is TS_2DIFF. */
+  private String int32Encoding = "TS_2DIFF";
+
+  /** Encoder of int64 and timestamp column. Default value is TS_2DIFF. */
+  private String int64Encoding = "TS_2DIFF";
+
+  /** Encoder of float column. Default value is GORILLA. */
+  private String floatEncoding = "GORILLA";
+
+  /** Encoder of double column. Default value is GORILLA. */
+  private String doubleEncoding = "GORILLA";
+
+  /** Encoder of string, blob and text column. Default value is PLAIN. */
+  private String textEncoding = "PLAIN";
 
   /**
    * Encoder of value series. default value is PLAIN. For int, long data type, TsFile also supports
@@ -344,10 +356,23 @@ public class TSFileConfig implements Serializable {
 
   public String getValueEncoder(TSDataType dataType) {
     switch (dataType) {
+      case BOOLEAN:
+        return booleanEncoding;
+      case INT32:
+      case DATE:
+        return int32Encoding;
+      case INT64:
       case TIMESTAMP:
-        return timestampValueEncoder;
+        return int64Encoding;
+      case FLOAT:
+        return floatEncoding;
+      case DOUBLE:
+        return doubleEncoding;
+      case STRING:
+      case BLOB:
+      case TEXT:
       default:
-        return valueEncoder;
+        return textEncoding;
     }
   }
 
@@ -355,12 +380,52 @@ public class TSFileConfig implements Serializable {
     this.valueEncoder = valueEncoder;
   }
 
-  public void setTimestampValueEncoder(String timestampValueEncoder) {
-    this.timestampValueEncoder = timestampValueEncoder;
+  public String getBooleanEncoding() {
+    return booleanEncoding;
   }
 
-  public String getTimestampValueEncoder() {
-    return timestampValueEncoder;
+  public void setBooleanEncoding(String booleanEncoding) {
+    this.booleanEncoding = booleanEncoding;
+  }
+
+  public String getInt32Encoding() {
+    return int32Encoding;
+  }
+
+  public void setInt32Encoding(String int32Encoding) {
+    this.int32Encoding = int32Encoding;
+  }
+
+  public String getInt64Encoding() {
+    return int64Encoding;
+  }
+
+  public void setInt64Encoding(String int64Encoding) {
+    this.int64Encoding = int64Encoding;
+  }
+
+  public String getFloatEncoding() {
+    return floatEncoding;
+  }
+
+  public void setFloatEncoding(String floatEncoding) {
+    this.floatEncoding = floatEncoding;
+  }
+
+  public String getDoubleEncoding() {
+    return doubleEncoding;
+  }
+
+  public void setDoubleEncoding(String doubleEncoding) {
+    this.doubleEncoding = doubleEncoding;
+  }
+
+  public String getTextEncoding() {
+    return textEncoding;
+  }
+
+  public void setTextEncoding(String textEncoding) {
+    this.textEncoding = textEncoding;
   }
 
   public int getRleBitWidth() {
