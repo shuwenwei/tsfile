@@ -112,7 +112,7 @@ public class TSFileConfig implements Serializable {
    * Encoder of TIMESTAMP column, TsFile supports TS_2DIFF, PLAIN and RLE(run-length encoding)
    * Default value is TS_2DIFF.
    */
-  private String timestampEncoder = "TS_2DIFF";
+  private String timestampValueEncoder = "TS_2DIFF";
 
   /**
    * Encoder of value series. default value is PLAIN. For int, long data type, TsFile also supports
@@ -345,7 +345,7 @@ public class TSFileConfig implements Serializable {
   public String getValueEncoder(TSDataType dataType) {
     switch (dataType) {
       case TIMESTAMP:
-        return timestampEncoder;
+        return timestampValueEncoder;
       default:
         return valueEncoder;
     }
@@ -355,12 +355,12 @@ public class TSFileConfig implements Serializable {
     this.valueEncoder = valueEncoder;
   }
 
-  public void setTimestampEncoder(String timestampEncoder) {
-    this.timestampEncoder = timestampEncoder;
+  public void setTimestampValueEncoder(String timestampValueEncoder) {
+    this.timestampValueEncoder = timestampValueEncoder;
   }
 
-  public String getTimestampEncoder() {
-    return timestampEncoder;
+  public String getTimestampValueEncoder() {
+    return timestampValueEncoder;
   }
 
   public int getRleBitWidth() {
