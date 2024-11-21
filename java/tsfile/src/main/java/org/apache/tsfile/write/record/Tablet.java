@@ -143,20 +143,15 @@ public class Tablet {
 
   /**
    * Return a {@link Tablet} with the specified number of rows (maxBatchSize). Only for writing in
-   * TsFileWriter.
+   * DeviceTableModelWriter.
    *
-   * @param tableName the name of the table specified to be written in
    * @param measurementList the list of measurement names for creating the row batch
    * @param dataTypeList the list of {@link TSDataType}s for creating the row batch
    * @param maxRowNum the maximum number of rows for this tablet
    */
   @TsFileApi
-  public Tablet(
-      String tableName,
-      List<String> measurementList,
-      List<TSDataType> dataTypeList,
-      int maxRowNum) {
-    this(tableName, measurementList, dataTypeList, null, maxRowNum, false);
+  public Tablet(List<String> measurementList, List<TSDataType> dataTypeList, int maxRowNum) {
+    this(null, measurementList, dataTypeList, null, maxRowNum, false);
   }
 
   public Tablet(
@@ -270,9 +265,6 @@ public class Tablet {
     this.bitMaps = new BitMap[schemas.size()];
     for (int column = 0; column < schemas.size(); column++) {
       BitMap bitMap = new BitMap(getMaxRowNumber());
-      if (autoUpdateBitMaps) {
-        bitMap.markAll();
-      }
       this.bitMaps[column] = bitMap;
     }
   }
@@ -457,9 +449,14 @@ public class Tablet {
   }
 
   private void updateBitMap(int rowIndex, int columnIndex, boolean mark) {
-    autoUpdateBitMaps = true;
     if (bitMaps == null) {
       initBitMaps();
+    }
+    if (!autoUpdateBitMaps) {
+      autoUpdateBitMaps = true;
+      for (BitMap bitMap : bitMaps) {
+        bitMap.markAll();
+      }
     }
     if (mark) {
       bitMaps[columnIndex].mark(rowIndex);
@@ -1029,11 +1026,24 @@ public class Tablet {
     }
 
     for (int i = 0; i < columns; i++) {
-      if (!thisBitMaps[i].equals(thatBitMaps[i])) {
+      if (!isBitMapEqual(thisBitMaps[i], thatBitMaps[i])) {
         return false;
       }
     }
     return true;
+  }
+
+  private boolean isBitMapEqual(BitMap thisBitMap, BitMap thatBitMap) {
+    if (thisBitMap == thatBitMap) {
+      return true;
+    }
+    if (thisBitMap == null) {
+      return thatBitMap.isAllUnmarked(rowSize);
+    }
+    if (thatBitMap == null) {
+      return thisBitMap.isAllUnmarked(rowSize);
+    }
+    return thisBitMap.equalsInRange(thatBitMap, rowSize);
   }
 
   public boolean isNull(int i, int j) {

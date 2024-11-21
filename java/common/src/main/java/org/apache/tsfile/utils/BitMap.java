@@ -165,6 +165,35 @@ public class BitMap {
     return this.size == other.size && Arrays.equals(this.bits, other.bits);
   }
 
+  public boolean equalsInRange(Object obj, int rangeSize) {
+    if (obj == this) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (!(obj instanceof BitMap)) {
+      return false;
+    }
+    BitMap other = (BitMap) obj;
+    // implement
+
+    int byteSize = rangeSize / Byte.SIZE;
+    for (int i = 0; i < byteSize; i++) {
+      if (this.bits[i] != other.bits[i]) {
+        return false;
+      }
+    }
+    int remainingBits = rangeSize % Byte.SIZE;
+    if (remainingBits > 0) {
+      byte mask = (byte) (0xFF >> (Byte.SIZE - remainingBits));
+      if ((this.bits[byteSize] & mask) != (other.bits[byteSize] & mask)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @Override
   public BitMap clone() {
     byte[] cloneBytes = new byte[this.bits.length];

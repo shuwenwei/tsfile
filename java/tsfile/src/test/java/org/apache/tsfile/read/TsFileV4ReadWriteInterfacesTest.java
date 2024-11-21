@@ -60,7 +60,8 @@ public class TsFileV4ReadWriteInterfacesTest {
                 IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10004")),
             tsFileReader.getAllDevices());
         List<IMeasurementSchema> timeseriesSchema =
-            tsFileReader.getTimeseriesSchema("root.testsg.d10000");
+            tsFileReader.getTimeseriesSchema(
+                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10000"));
         Assert.assertEquals(2, timeseriesSchema.size());
         Assert.assertEquals("", timeseriesSchema.get(0).getMeasurementName());
         Assert.assertEquals("s0", timeseriesSchema.get(1).getMeasurementName());
@@ -89,8 +90,7 @@ public class TsFileV4ReadWriteInterfacesTest {
                   Tablet.ColumnCategory.ID,
                   Tablet.ColumnCategory.ID,
                   Tablet.ColumnCategory.MEASUREMENT));
-      try (DeviceTableModelWriter writer = new DeviceTableModelWriter(file)) {
-        writer.registerTableSchema(tableSchema);
+      try (DeviceTableModelWriter writer = new DeviceTableModelWriter(file, tableSchema)) {
         Tablet tablet =
             new Tablet(
                 tableSchema.getTableName(),

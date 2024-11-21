@@ -38,10 +38,12 @@ import java.util.List;
 
 public class DeviceTableModelWriter extends CommonModelWriter {
 
+  private String tableName;
   private boolean isTableWriteAligned = true;
 
-  public DeviceTableModelWriter(File file) throws IOException {
+  public DeviceTableModelWriter(File file, TableSchema tableSchema) throws IOException {
     super(file);
+    registerTableSchema(tableSchema);
   }
 
   /**
@@ -95,11 +97,12 @@ public class DeviceTableModelWriter extends CommonModelWriter {
 
   private void checkIsTableExistAndSetColumnCategoryList(Tablet tablet)
       throws WriteProcessException {
-    String tableName = tablet.getTableName();
-    final TableSchema tableSchema = getSchema().getTableSchemaMap().get(tableName);
-    if (tableSchema == null) {
-      throw new NoTableException(tableName);
+    String tabletTableName = tablet.getTableName();
+    if (tabletTableName != null && !this.tableName.equals(tabletTableName)) {
+      throw new NoTableException(tabletTableName);
     }
+    tablet.setTableName(this.tableName);
+    final TableSchema tableSchema = getSchema().getTableSchemaMap().get(tableName);
 
     List<Tablet.ColumnCategory> columnCategoryListForTablet =
         new ArrayList<>(tablet.getSchemas().size());
@@ -127,7 +130,8 @@ public class DeviceTableModelWriter extends CommonModelWriter {
     isTableWriteAligned = tableWriteAligned;
   }
 
-  public void registerTableSchema(TableSchema tableSchema) {
+  private void registerTableSchema(TableSchema tableSchema) {
+    this.tableName = tableSchema.getTableName();
     getSchema().registerTableSchema(tableSchema);
   }
 

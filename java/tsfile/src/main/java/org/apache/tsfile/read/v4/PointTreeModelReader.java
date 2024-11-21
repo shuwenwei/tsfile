@@ -48,10 +48,9 @@ public class PointTreeModelReader extends CommonModelReader {
   }
 
   @TsFileApi
-  public List<IMeasurementSchema> getTimeseriesSchema(String deviceId) throws IOException {
-    IDeviceID iDeviceID = IDeviceID.Factory.DEFAULT_FACTORY.create(deviceId);
+  public List<IMeasurementSchema> getTimeseriesSchema(IDeviceID deviceId) throws IOException {
     List<TimeseriesMetadata> deviceTimeseriesMetadata =
-        fileReader.getDeviceTimeseriesMetadataWithoutChunkMetadata(iDeviceID);
+        fileReader.getDeviceTimeseriesMetadataWithoutChunkMetadata(deviceId);
     List<IMeasurementSchema> measurementSchemaList = new ArrayList<>();
     for (TimeseriesMetadata timeseriesMetadata : deviceTimeseriesMetadata) {
       measurementSchemaList.add(

@@ -128,7 +128,6 @@ public class ResultSetTest {
                 Tablet.ColumnCategory.MEASUREMENT));
     Tablet tablet =
         new Tablet(
-            "t1",
             Arrays.asList("id1", "id2", "s1", "s2"),
             Arrays.asList(
                 TSDataType.STRING, TSDataType.STRING, TSDataType.BOOLEAN, TSDataType.BOOLEAN),
@@ -145,8 +144,7 @@ public class ResultSetTest {
 
     tablet.addTimestamp(2, 2);
 
-    try (DeviceTableModelWriter writer = new DeviceTableModelWriter(tsfile)) {
-      writer.registerTableSchema(tableSchema);
+    try (DeviceTableModelWriter writer = new DeviceTableModelWriter(tsfile, tableSchema)) {
       writer.writeTable(tablet);
     }
 
