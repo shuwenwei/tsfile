@@ -126,13 +126,12 @@ public class ITsFileReaderAndITsFileWriter {
       // first column is Time
       ResultSetMetadata metadata = resultSet.getMetadata();
       System.out.println(metadata);
+      StringJoiner sj = new StringJoiner(" ");
+      for (int column = 1; column <= 5; column++) {
+        sj.add(metadata.getColumnName(column) + "(" + metadata.getColumnType(column) + ") ");
+      }
+      System.out.println(sj.toString());
       while (resultSet.next()) {
-        StringJoiner sj = new StringJoiner(" ");
-        for (int column = 1; column <= 5; column++) {
-          sj.add(metadata.getColumnName(column) + "(" + metadata.getColumnType(column) + ") ");
-        }
-        System.out.println(sj.toString());
-
         // columnIndex starts from 1
         // Time id1 id2 s1 s2
         Long timeField = resultSet.getLong("Time");
