@@ -57,7 +57,7 @@ public class TsFileWriterBuilder {
   }
 
   private void validateParameters() {
-    if (file == null || !file.exists() || file.isDirectory()) {
+    if (file == null || file.isDirectory()) {
       throw new IllegalArgumentException("The file must be a non-null and non-directory File.");
     }
     if (this.tableSchema == null) {
