@@ -97,7 +97,7 @@ public class WriteTabletWithITsFileWriter {
       // reset tablet
       tablet.reset();
 
-      for (int timestamp = 0; timestamp < 5; timestamp++) {
+      for (long timestamp = 0; timestamp < 5; timestamp++) {
         int rowIndex = tablet.getRowSize();
         // rowSize may be changed after addTimestamp
         tablet.addTimestamp(rowIndex, timestamp);
@@ -108,7 +108,8 @@ public class WriteTabletWithITsFileWriter {
         // id2 column
         tablet.addValue(rowIndex, 1, "id1_field_2");
 
-        tablet.addValue(rowIndex, 2, timestamp);
+        // s1 column
+        tablet.addValue(rowIndex, 2, 1);
 
         // s2 column
         tablet.addValue(rowIndex, 3, false);
