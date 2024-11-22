@@ -30,9 +30,7 @@ import org.apache.tsfile.write.chunk.AlignedChunkGroupWriterImpl;
 import org.apache.tsfile.write.chunk.IChunkGroupWriter;
 import org.apache.tsfile.write.chunk.NonAlignedChunkGroupWriterImpl;
 import org.apache.tsfile.write.schema.Schema;
-import org.apache.tsfile.write.writer.RestorableTsFileIOWriter;
 import org.apache.tsfile.write.writer.TsFileIOWriter;
-import org.apache.tsfile.write.writer.TsFileOutput;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +45,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-class CommonModelWriter implements AutoCloseable {
+abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
 
   protected static final TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
-  protected static final Logger LOG = LoggerFactory.getLogger(CommonModelWriter.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(AbstractTableModelTsFileWriter.class);
 
   /** IO writer of this TsFile. */
   protected final TsFileIOWriter fileWriter;
@@ -69,12 +67,6 @@ class CommonModelWriter implements AutoCloseable {
   // TimeseriesId -> LastTime
   protected Map<IDeviceID, Map<String, Long>> nonAlignedTimeseriesLastTimeMap = new HashMap<>();
 
-  /**
-   * if true, this tsfile allow unsequential data when writing; Otherwise, it limits the user to
-   * write only sequential data
-   */
-  protected boolean isUnseq = false;
-
   protected Map<IDeviceID, IChunkGroupWriter> groupWriters = new TreeMap<>();
 
   /** min value of threshold of data points num check. */
@@ -88,72 +80,15 @@ class CommonModelWriter implements AutoCloseable {
    * @param file the File to be written by this TsFileWriter
    */
   @TsFileApi
-  public CommonModelWriter(File file) throws IOException {
-    this(new TsFileIOWriter(file), new Schema(), TSFileDescriptor.getInstance().getConfig());
-  }
-
-  /**
-   * init this Writer.
-   *
-   * @param fileWriter the io writer of this TsFile
-   */
-  public CommonModelWriter(TsFileIOWriter fileWriter) throws IOException {
-    this(fileWriter, new Schema(), TSFileDescriptor.getInstance().getConfig());
-  }
-
-  /**
-   * init this Writer.
-   *
-   * @param file the File to be written by this TsFileWriter
-   * @param schema the schema of this TsFile
-   */
-  public CommonModelWriter(File file, Schema schema) throws IOException {
-    this(new TsFileIOWriter(file), schema, TSFileDescriptor.getInstance().getConfig());
-  }
-
-  /**
-   * init this Writer.
-   *
-   * @param output the TsFileOutput of the file to be written by this TsFileWriter
-   * @param schema the schema of this TsFile
-   */
-  public CommonModelWriter(TsFileOutput output, Schema schema) throws IOException {
-    this(new TsFileIOWriter(output), schema, TSFileDescriptor.getInstance().getConfig());
-  }
-
-  /**
-   * init this Writer.
-   *
-   * @param file the File to be written by this PointTreeModelWriter
-   * @param schema the schema of this TsFile
-   * @param conf the configuration of this TsFile
-   */
-  public CommonModelWriter(File file, Schema schema, TSFileConfig conf) throws IOException {
-    this(new TsFileIOWriter(file), schema, conf);
-  }
-
-  /**
-   * init this Writer.
-   *
-   * @param fileWriter the io writer of this TsFile
-   * @param schema the schema of this TsFile
-   * @param conf the configuration of this TsFile
-   */
-  protected CommonModelWriter(TsFileIOWriter fileWriter, Schema schema, TSFileConfig conf)
+  protected AbstractTableModelTsFileWriter(File file, long chunkGroupSizeThreshold)
       throws IOException {
-    if (!fileWriter.canWrite()) {
-      throw new IOException(
-          "the given file Writer does not support writing any more. Maybe it is an complete TsFile");
-    }
-    this.fileWriter = fileWriter;
-
-    if (fileWriter instanceof RestorableTsFileIOWriter) {
-      schema = ((RestorableTsFileIOWriter) fileWriter).getKnownSchema();
-    }
+    Schema schema = new Schema();
+    TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
+    this.fileWriter = new TsFileIOWriter(file);
     fileWriter.setSchema(schema);
 
     this.pageSize = conf.getPageSizeInByte();
-    this.chunkGroupSizeThreshold = conf.getGroupSizeInByte();
+    this.chunkGroupSizeThreshold = chunkGroupSizeThreshold;
     config.setTSFileStorageFs(conf.getTSFileStorageFs());
     if (this.pageSize >= chunkGroupSizeThreshold) {
       LOG.warn(
@@ -210,17 +145,13 @@ class CommonModelWriter implements AutoCloseable {
     if (groupWriter == null) {
       if (isAligned) {
         groupWriter = new AlignedChunkGroupWriterImpl(deviceId, encryptParam);
-        if (!isUnseq) { // Sequence File
-          ((AlignedChunkGroupWriterImpl) groupWriter)
-              .setLastTime(alignedDeviceLastTimeMap.get(deviceId));
-        }
+        ((AlignedChunkGroupWriterImpl) groupWriter)
+            .setLastTime(alignedDeviceLastTimeMap.get(deviceId));
       } else {
         groupWriter = new NonAlignedChunkGroupWriterImpl(deviceId, encryptParam);
-        if (!isUnseq) { // Sequence File
-          ((NonAlignedChunkGroupWriterImpl) groupWriter)
-              .setLastTimeMap(
-                  nonAlignedTimeseriesLastTimeMap.getOrDefault(deviceId, new HashMap<>()));
-        }
+        ((NonAlignedChunkGroupWriterImpl) groupWriter)
+            .setLastTimeMap(
+                nonAlignedTimeseriesLastTimeMap.getOrDefault(deviceId, new HashMap<>()));
       }
       groupWriters.put(deviceId, groupWriter);
     }
@@ -272,7 +203,7 @@ class CommonModelWriter implements AutoCloseable {
    * @throws IOException exception in IO
    */
   @TsFileApi
-  public boolean flush() throws IOException {
+  protected boolean flush() throws IOException {
     if (recordCount > 0) {
       for (Map.Entry<IDeviceID, IChunkGroupWriter> entry : groupWriters.entrySet()) {
         IDeviceID deviceId = entry.getKey();
@@ -300,16 +231,12 @@ class CommonModelWriter implements AutoCloseable {
                     }
                   });
           // add lastTime
-          if (!isUnseq) { // Sequence TsFile
-            this.alignedDeviceLastTimeMap.put(
-                deviceId, ((AlignedChunkGroupWriterImpl) groupWriter).getLastTime());
-          }
+          this.alignedDeviceLastTimeMap.put(
+              deviceId, ((AlignedChunkGroupWriterImpl) groupWriter).getLastTime());
         } else {
           // add lastTime
-          if (!isUnseq) { // Sequence TsFile
-            this.nonAlignedTimeseriesLastTimeMap.put(
-                deviceId, ((NonAlignedChunkGroupWriterImpl) groupWriter).getLastTimeMap());
-          }
+          this.nonAlignedTimeseriesLastTimeMap.put(
+              deviceId, ((NonAlignedChunkGroupWriterImpl) groupWriter).getLastTimeMap());
         }
       }
       reset();
@@ -338,14 +265,16 @@ class CommonModelWriter implements AutoCloseable {
   /**
    * calling this method to write the last data remaining in memory and close the normal and error
    * OutputStream.
-   *
-   * @throws IOException exception in IO
    */
   @Override
   @TsFileApi
-  public void close() throws IOException {
+  public void close() {
     LOG.info("start close file");
-    flush();
-    fileWriter.endFile();
+    try {
+      flush();
+      fileWriter.endFile();
+    } catch (IOException e) {
+      LOG.warn("Meet exception when close file writer. ", e);
+    }
   }
 }

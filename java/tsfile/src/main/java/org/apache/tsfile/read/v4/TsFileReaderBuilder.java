@@ -17,17 +17,33 @@
  * under the License.
  */
 
-package org.apache.tsfile.read.query.dataset;
+package org.apache.tsfile.read.v4;
 
 import org.apache.tsfile.common.TsFileApi;
-import org.apache.tsfile.enums.TSDataType;
 
-public interface ResultSetMetadata {
-  // columnIndex starting from 1
-  @TsFileApi
-  String getColumnName(int columnIndex);
+import java.io.File;
+import java.io.IOException;
 
-  // columnIndex starting from 1
+public class TsFileReaderBuilder {
+
+  private File file;
+
   @TsFileApi
-  TSDataType getColumnType(int columnIndex);
+  public ITsFileReader build() throws IOException {
+    validateParameters();
+    return new DeviceTableModelReader(file);
+  }
+
+  @TsFileApi
+  public TsFileReaderBuilder file(File file) {
+    this.file = file;
+    return this;
+  }
+
+  @TsFileApi
+  private void validateParameters() {
+    if (file == null || !file.exists() || file.isDirectory()) {
+      throw new IllegalArgumentException("The file must be a non-null and non-directory File.");
+    }
+  }
 }

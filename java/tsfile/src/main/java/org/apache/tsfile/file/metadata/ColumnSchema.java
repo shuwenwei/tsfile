@@ -17,17 +17,32 @@
  * under the License.
  */
 
-package org.apache.tsfile.read.query.dataset;
+package org.apache.tsfile.file.metadata;
 
-import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.write.record.Tablet;
+import org.apache.tsfile.write.record.Tablet.ColumnCategory;
 
-public interface ResultSetMetadata {
-  // columnIndex starting from 1
-  @TsFileApi
-  String getColumnName(int columnIndex);
+public class ColumnSchema {
+  private String columnName;
+  private TSDataType dataType;
+  private ColumnCategory columnCategory;
 
-  // columnIndex starting from 1
-  @TsFileApi
-  TSDataType getColumnType(int columnIndex);
+  public ColumnSchema(String columnName, TSDataType dataType, ColumnCategory columnCategory) {
+    this.columnName = columnName;
+    this.dataType = dataType;
+    this.columnCategory = columnCategory;
+  }
+
+  public String getColumnName() {
+    return columnName;
+  }
+
+  public TSDataType getDataType() {
+    return dataType;
+  }
+
+  public Tablet.ColumnCategory getColumnCategory() {
+    return columnCategory;
+  }
 }

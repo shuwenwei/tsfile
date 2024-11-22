@@ -36,13 +36,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeviceTableModelWriter extends CommonModelWriter {
+public class DeviceTableModelWriter extends AbstractTableModelTsFileWriter {
 
   private String tableName;
   private boolean isTableWriteAligned = true;
 
-  public DeviceTableModelWriter(File file, TableSchema tableSchema) throws IOException {
-    super(file);
+  public DeviceTableModelWriter(File file, TableSchema tableSchema, long memoryThreshold)
+      throws IOException {
+    super(file, memoryThreshold);
     registerTableSchema(tableSchema);
   }
 
@@ -58,41 +59,21 @@ public class DeviceTableModelWriter extends CommonModelWriter {
    * @throws WriteProcessException if the schema is not registered first
    */
   @TsFileApi
-  public boolean writeTable(Tablet table) throws IOException, WriteProcessException {
-    return writeTable(table, null);
-  }
-
-  /**
-   * Write the tablet in to the TsFile with the table-view.
-   *
-   * @param tablet data to write
-   * @param deviceIdEndIndexPairs each deviceId and its end row number in row order. For example, if
-   *     the first three rows belong to device ("table1", "d1"), the next five rows belong to device
-   *     ("table1", "d2"), and the last two rows belong to device ("table1", "d3"), then the list
-   *     will be [(("table1", "d1"), 3), (("table1", "d2"), 8), (("table1", "d3"), 10)]. If the list
-   *     is not provided, the method will try to split the tablet.
-   * @return true if a flush is triggered after write, false otherwise
-   * @throws IOException if the file cannot be written
-   * @throws WriteProcessException if the schema is not registered first
-   */
-  public boolean writeTable(Tablet tablet, List<Pair<IDeviceID, Integer>> deviceIdEndIndexPairs)
-      throws IOException, WriteProcessException {
+  public void write(Tablet table) throws IOException, WriteProcessException {
     // make sure the ChunkGroupWriter for this Tablet exist and there is no type conflict
-    checkIsTableExistAndSetColumnCategoryList(tablet);
+    checkIsTableExistAndSetColumnCategoryList(table);
     // spilt the tablet by deviceId
-    if (deviceIdEndIndexPairs == null) {
-      deviceIdEndIndexPairs = WriteUtils.splitTabletByDevice(tablet);
-    }
+    List<Pair<IDeviceID, Integer>> deviceIdEndIndexPairs = WriteUtils.splitTabletByDevice(table);
 
     int startIndex = 0;
     for (Pair<IDeviceID, Integer> pair : deviceIdEndIndexPairs) {
       // get corresponding ChunkGroupWriter and write this Tablet
       recordCount +=
           tryToInitialGroupWriter(pair.left, isTableWriteAligned)
-              .write(tablet, startIndex, pair.right);
+              .write(table, startIndex, pair.right);
       startIndex = pair.right;
     }
-    return checkMemorySizeAndMayFlushChunks();
+    checkMemorySizeAndMayFlushChunks();
   }
 
   private void checkIsTableExistAndSetColumnCategoryList(Tablet tablet)
@@ -122,20 +103,8 @@ public class DeviceTableModelWriter extends CommonModelWriter {
     tablet.setColumnCategories(columnCategoryListForTablet);
   }
 
-  public boolean isTableWriteAligned() {
-    return isTableWriteAligned;
-  }
-
-  public void setTableWriteAligned(boolean tableWriteAligned) {
-    isTableWriteAligned = tableWriteAligned;
-  }
-
   private void registerTableSchema(TableSchema tableSchema) {
     this.tableName = tableSchema.getTableName();
     getSchema().registerTableSchema(tableSchema);
-  }
-
-  public void setGenerateTableSchema(boolean generateTableSchema) {
-    this.getIOWriter().setGenerateTableSchema(generateTableSchema);
   }
 }

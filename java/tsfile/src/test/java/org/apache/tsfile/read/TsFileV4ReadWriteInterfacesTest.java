@@ -24,13 +24,13 @@ import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.StringArrayDeviceID;
 import org.apache.tsfile.file.metadata.TableSchema;
 import org.apache.tsfile.read.v4.DeviceTableModelReader;
-import org.apache.tsfile.read.v4.PointTreeModelReader;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
 import org.apache.tsfile.utils.TsFileGeneratorUtils;
 import org.apache.tsfile.write.record.Tablet;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.schema.MeasurementSchema;
-import org.apache.tsfile.write.v4.DeviceTableModelWriter;
+import org.apache.tsfile.write.v4.ITsFileWriter;
+import org.apache.tsfile.write.v4.TsFileWriterBuilder;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,36 +40,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 public class TsFileV4ReadWriteInterfacesTest {
-  @Test
-  public void testGetDeviceMethods() throws Exception {
-    String filePath = TsFileGeneratorForTest.getTestTsFilePath("root.testsg", 0, 0, 0);
-    try {
-      File file = TsFileGeneratorUtils.generateAlignedTsFile(filePath, 5, 1, 10, 1, 1, 10, 100);
-      try (PointTreeModelReader tsFileReader = new PointTreeModelReader(file)) {
-        Assert.assertEquals(
-            Arrays.asList(
-                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10000"),
-                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10001"),
-                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10002"),
-                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10003"),
-                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10004")),
-            tsFileReader.getAllDevices());
-        List<IMeasurementSchema> timeseriesSchema =
-            tsFileReader.getTimeseriesSchema(
-                IDeviceID.Factory.DEFAULT_FACTORY.create("root.testsg.d10000"));
-        Assert.assertEquals(2, timeseriesSchema.size());
-        Assert.assertEquals("", timeseriesSchema.get(0).getMeasurementName());
-        Assert.assertEquals("s0", timeseriesSchema.get(1).getMeasurementName());
-      }
-    } finally {
-      Files.deleteIfExists(Paths.get(filePath));
-    }
-  }
 
   @Test
   public void testGetTableDeviceMethods() throws Exception {
@@ -90,7 +63,8 @@ public class TsFileV4ReadWriteInterfacesTest {
                   Tablet.ColumnCategory.ID,
                   Tablet.ColumnCategory.ID,
                   Tablet.ColumnCategory.MEASUREMENT));
-      try (DeviceTableModelWriter writer = new DeviceTableModelWriter(file, tableSchema)) {
+      try (ITsFileWriter writer =
+          new TsFileWriterBuilder().file(file).tableSchema(tableSchema).build()) {
         Tablet tablet =
             new Tablet(
                 tableSchema.getTableName(),
@@ -118,14 +92,11 @@ public class TsFileV4ReadWriteInterfacesTest {
           tablet.addValue("s1", i, i);
         }
         tablet.setRowSize(ids.length);
-        writer.writeTable(tablet);
+        writer.write(tablet);
       }
       try (DeviceTableModelReader tsFileReader = new DeviceTableModelReader(file)) {
-        Assert.assertEquals(
-            new HashSet<>(deviceIDList), new HashSet<>(tsFileReader.getAllTableDevices("t1")));
-        Assert.assertEquals("t1", tsFileReader.getAllTables().get(0));
-        Assert.assertEquals(
-            tableSchema, tsFileReader.getTableSchema(Collections.singletonList("t1")).get(0));
+        Assert.assertEquals("t1", tsFileReader.getAllTableSchema().get(0).getTableName());
+        Assert.assertEquals(tableSchema, tsFileReader.getTableSchemas("t1").get());
       }
     } finally {
       Files.deleteIfExists(Paths.get(filePath));

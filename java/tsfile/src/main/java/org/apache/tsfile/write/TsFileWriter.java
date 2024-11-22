@@ -67,7 +67,6 @@ import java.util.TreeMap;
  * close()} method to flush the last data outside and close the normal outputStream and error
  * outputStream.
  */
-@Deprecated
 public class TsFileWriter implements AutoCloseable {
 
   protected static final TSFileConfig config = TSFileDescriptor.getInstance().getConfig();

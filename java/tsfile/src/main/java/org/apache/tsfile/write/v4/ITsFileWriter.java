@@ -17,17 +17,19 @@
  * under the License.
  */
 
-package org.apache.tsfile.read.query.dataset;
+package org.apache.tsfile.write.v4;
 
 import org.apache.tsfile.common.TsFileApi;
-import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.exception.write.WriteProcessException;
+import org.apache.tsfile.write.record.Tablet;
 
-public interface ResultSetMetadata {
-  // columnIndex starting from 1
-  @TsFileApi
-  String getColumnName(int columnIndex);
+import java.io.IOException;
 
-  // columnIndex starting from 1
+public interface ITsFileWriter extends AutoCloseable {
+
   @TsFileApi
-  TSDataType getColumnType(int columnIndex);
+  void write(Tablet tablet) throws IOException, WriteProcessException;
+
+  @TsFileApi
+  void close();
 }

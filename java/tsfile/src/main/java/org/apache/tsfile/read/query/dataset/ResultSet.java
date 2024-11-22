@@ -20,150 +20,71 @@
 package org.apache.tsfile.read.query.dataset;
 
 import org.apache.tsfile.common.TsFileApi;
-import org.apache.tsfile.enums.TSDataType;
-import org.apache.tsfile.read.common.Field;
-import org.apache.tsfile.read.common.RowRecord;
-import org.apache.tsfile.utils.Binary;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public abstract class ResultSet {
-
-  protected ResultSetMetadata resultSetMetadata;
-  protected Map<String, Integer> columnNameToColumnIndexMap;
-  protected RowRecord currentRow;
-
-  protected ResultSet(List<String> columnNameList, List<TSDataType> tsDataTypeList) {
-    // Add Time at first column
-    this.resultSetMetadata = new ResultSetMetadata(columnNameList, tsDataTypeList);
-    this.columnNameToColumnIndexMap = new HashMap<>(resultSetMetadata.getColumnNum());
-    for (int columnIndex = 1; columnIndex <= resultSetMetadata.getColumnNum(); columnIndex++) {
-      this.columnNameToColumnIndexMap.put(
-          resultSetMetadata.getColumnName(columnIndex), columnIndex);
-    }
-  }
+public interface ResultSet {
 
   @TsFileApi
-  public ResultSetMetadata getMetadata() {
-    return this.resultSetMetadata;
-  }
+  ResultSetMetadata getMetadata();
 
   @TsFileApi
-  public abstract boolean next() throws IOException;
+  boolean next() throws IOException;
 
   @TsFileApi
-  public int getInt(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getInt(columnIndex);
-  }
+  int getInt(String columnName);
 
   @TsFileApi
-  public int getInt(int columnIndex) {
-    return getField(columnIndex).getIntV();
-  }
+  int getInt(int columnIndex);
 
   @TsFileApi
-  public long getLong(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getLong(columnIndex);
-  }
+  long getLong(String columnName);
 
   @TsFileApi
-  public long getLong(int columnIndex) {
-    return getField(columnIndex).getLongV();
-  }
+  long getLong(int columnIndex);
 
   @TsFileApi
-  public float getFloat(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getFloat(columnIndex);
-  }
+  float getFloat(String columnName);
 
   @TsFileApi
-  public float getFloat(int columnIndex) {
-    return getField(columnIndex).getFloatV();
-  }
+  float getFloat(int columnIndex);
 
   @TsFileApi
-  public double getDouble(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getDouble(columnIndex);
-  }
+  double getDouble(String columnName);
 
   @TsFileApi
-  public double getDouble(int columnIndex) {
-    return getField(columnIndex).getDoubleV();
-  }
+  double getDouble(int columnIndex);
 
   @TsFileApi
-  public boolean getBoolean(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getBoolean(columnIndex);
-  }
+  boolean getBoolean(String columnName);
 
   @TsFileApi
-  public boolean getBoolean(int columnIndex) {
-    return getField(columnIndex).getBoolV();
-  }
+  boolean getBoolean(int columnIndex);
 
   @TsFileApi
-  public String getString(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getString(columnIndex);
-  }
+  String getString(String columnName);
 
   @TsFileApi
-  public String getString(int columnIndex) {
-    return getField(columnIndex).getStringValue();
-  }
+  String getString(int columnIndex);
 
   @TsFileApi
-  public LocalDate getDate(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getDate(columnIndex);
-  }
+  LocalDate getDate(String columnName);
 
   @TsFileApi
-  public LocalDate getDate(int columnIndex) {
-    return getField(columnIndex).getDateV();
-  }
+  LocalDate getDate(int columnIndex);
 
   @TsFileApi
-  public Binary getBinary(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return getBinary(columnIndex);
-  }
+  byte[] getBinary(String columnName);
 
   @TsFileApi
-  public Binary getBinary(int columnIndex) {
-    return getField(columnIndex).getBinaryV();
-  }
+  byte[] getBinary(int columnIndex);
 
   @TsFileApi
-  public boolean isNull(String columnName) {
-    Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
-    return isNull(columnIndex);
-  }
+  boolean isNull(String columnName);
 
   @TsFileApi
-  public boolean isNull(int columnIndex) {
-    return getField(columnIndex) == null;
-  }
-
-  protected Field getField(int columnIndex) {
-    Field field;
-    if (columnIndex == 1) {
-      field = new Field(TSDataType.INT64);
-      field.setLongV(currentRow.getTimestamp());
-    } else {
-      field = currentRow.getField(columnIndex - 2);
-    }
-    return field;
-  }
+  boolean isNull(int columnIndex);
 
   @TsFileApi
   public abstract void close();

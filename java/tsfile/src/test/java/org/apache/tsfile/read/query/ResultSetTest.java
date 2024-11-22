@@ -20,18 +20,15 @@
 package org.apache.tsfile.read.query;
 
 import org.apache.tsfile.enums.TSDataType;
-import org.apache.tsfile.file.metadata.IDeviceID;
 import org.apache.tsfile.file.metadata.TableSchema;
-import org.apache.tsfile.read.common.TimeSeries;
 import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.read.query.dataset.ResultSetMetadata;
 import org.apache.tsfile.read.v4.DeviceTableModelReader;
-import org.apache.tsfile.read.v4.PointTreeModelReader;
 import org.apache.tsfile.utils.TsFileGeneratorForTest;
 import org.apache.tsfile.write.record.Tablet;
 import org.apache.tsfile.write.schema.MeasurementSchema;
-import org.apache.tsfile.write.v4.DeviceTableModelWriter;
-import org.apache.tsfile.write.v4.PointTreeModelWriter;
+import org.apache.tsfile.write.v4.ITsFileWriter;
+import org.apache.tsfile.write.v4.TsFileWriterBuilder;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -60,54 +57,6 @@ public class ResultSetTest {
   public void deleteFile() throws IOException {
     if (tsfile != null) {
       Files.deleteIfExists(tsfile.toPath());
-    }
-  }
-
-  @Test
-  public void testQueryTree() throws Exception {
-    Tablet tablet =
-        new Tablet(
-            "root.sg1.d1",
-            Arrays.asList(
-                new MeasurementSchema("s1", TSDataType.BOOLEAN),
-                new MeasurementSchema("s2", TSDataType.BOOLEAN)));
-    tablet.addTimestamp(0, 1);
-    tablet.addValue("s1", 0, true);
-    tablet.addValue("s2", 0, false);
-    tablet.addTimestamp(1, 2);
-    tablet.addValue("s2", 1, true);
-
-    try (PointTreeModelWriter writer = new PointTreeModelWriter(tsfile)) {
-      writer.registerTimeseries("root.sg1.d1", new MeasurementSchema("s1", TSDataType.BOOLEAN));
-      writer.registerTimeseries("root.sg1.d1", new MeasurementSchema("s2", TSDataType.BOOLEAN));
-      writer.writeTree(tablet);
-    }
-
-    try (PointTreeModelReader tsFileReader = new PointTreeModelReader(tsfile)) {
-      // s1 s2 s3 s4
-      ResultSet resultSet =
-          tsFileReader.query(
-              TimeSeries.getPathList(
-                  IDeviceID.Factory.DEFAULT_FACTORY.create("root.sg1.d1"), "s1", "s2", "s3", "s4"),
-              0,
-              2);
-      ResultSetMetadata resultSetMetadata = resultSet.getMetadata();
-      // Time s1 s2
-      Assert.assertEquals(3, resultSetMetadata.getColumnNum());
-      Assert.assertEquals("Time", resultSetMetadata.getColumnName(1));
-      Assert.assertEquals(TSDataType.INT64, resultSetMetadata.getColumnType(1));
-      Assert.assertEquals("root.sg1.d1.s1", resultSetMetadata.getColumnName(2));
-      Assert.assertEquals(TSDataType.BOOLEAN, resultSetMetadata.getColumnType(2));
-      Assert.assertEquals("root.sg1.d1.s2", resultSetMetadata.getColumnName(3));
-      Assert.assertEquals(TSDataType.BOOLEAN, resultSetMetadata.getColumnType(3));
-      Assert.assertTrue(resultSet.next());
-      Assert.assertEquals(1, resultSet.getLong(1));
-      Assert.assertTrue(resultSet.getBoolean(2));
-      Assert.assertFalse(resultSet.getBoolean(3));
-      Assert.assertTrue(resultSet.next());
-      Assert.assertEquals(2, resultSet.getLong(1));
-      Assert.assertTrue(resultSet.isNull(2));
-      Assert.assertTrue(resultSet.getBoolean(3));
     }
   }
 
@@ -144,17 +93,16 @@ public class ResultSetTest {
 
     tablet.addTimestamp(2, 2);
 
-    try (DeviceTableModelWriter writer = new DeviceTableModelWriter(tsfile, tableSchema)) {
-      writer.writeTable(tablet);
+    try (ITsFileWriter writer =
+        new TsFileWriterBuilder().file(tsfile).tableSchema(tableSchema).build()) {
+      writer.write(tablet);
     }
 
     try (DeviceTableModelReader tsFileReader = new DeviceTableModelReader(tsfile)) {
       // id1 id2 s2 s1
-      ResultSet resultSet =
-          tsFileReader.queryTable("t1", Arrays.asList("id1", "id2", "s2", "s1"), null, 0, 2);
+      ResultSet resultSet = tsFileReader.query("t1", Arrays.asList("id1", "id2", "s2", "s1"), 0, 2);
       ResultSetMetadata resultSetMetadata = resultSet.getMetadata();
       // Time id1 id2 s2 s1
-      Assert.assertEquals(5, resultSetMetadata.getColumnNum());
       Assert.assertEquals("Time", resultSetMetadata.getColumnName(1));
       Assert.assertEquals(TSDataType.INT64, resultSetMetadata.getColumnType(1));
       Assert.assertEquals("id1", resultSetMetadata.getColumnName(2));

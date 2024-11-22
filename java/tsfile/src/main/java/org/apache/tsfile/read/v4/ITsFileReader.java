@@ -17,17 +17,31 @@
  * under the License.
  */
 
-package org.apache.tsfile.read.query.dataset;
+package org.apache.tsfile.read.v4;
 
 import org.apache.tsfile.common.TsFileApi;
-import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.exception.read.ReadProcessException;
+import org.apache.tsfile.exception.write.NoMeasurementException;
+import org.apache.tsfile.exception.write.NoTableException;
+import org.apache.tsfile.file.metadata.TableSchema;
+import org.apache.tsfile.read.query.dataset.ResultSet;
 
-public interface ResultSetMetadata {
-  // columnIndex starting from 1
-  @TsFileApi
-  String getColumnName(int columnIndex);
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
-  // columnIndex starting from 1
+public interface ITsFileReader extends AutoCloseable {
+
   @TsFileApi
-  TSDataType getColumnType(int columnIndex);
+  ResultSet query(String tableName, List<String> columnNames, long startTime, long endTime)
+      throws ReadProcessException, IOException, NoTableException, NoMeasurementException;
+
+  @TsFileApi
+  Optional<TableSchema> getTableSchemas(String tableName) throws IOException;
+
+  @TsFileApi
+  List<TableSchema> getAllTableSchema() throws IOException;
+
+  @TsFileApi
+  void close();
 }

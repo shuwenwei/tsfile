@@ -31,7 +31,6 @@ import org.apache.tsfile.read.query.executor.TsFileExecutor;
 import java.io.File;
 import java.io.IOException;
 
-@Deprecated
 public class TsFileReader implements AutoCloseable {
 
   private TsFileSequenceReader fileReader;
@@ -52,12 +51,10 @@ public class TsFileReader implements AutoCloseable {
     this.tsfileExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
   }
 
-  @Deprecated
   public QueryDataSet query(QueryExpression queryExpression) throws IOException {
     return tsfileExecutor.execute(queryExpression);
   }
 
-  @Deprecated
   public QueryDataSet query(
       QueryExpression queryExpression, long partitionStartOffset, long partitionEndOffset)
       throws IOException {

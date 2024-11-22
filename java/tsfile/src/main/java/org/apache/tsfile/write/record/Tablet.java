@@ -122,12 +122,10 @@ public class Tablet {
     reset();
   }
 
-  @TsFileApi
   public Tablet(IDeviceID deviceID, List<String> measurementList, List<TSDataType> dataTypeList) {
     this(deviceID, measurementList, dataTypeList, DEFAULT_SIZE);
   }
 
-  @TsFileApi
   public Tablet(
       IDeviceID deviceID,
       List<String> measurementList,
@@ -141,17 +139,22 @@ public class Tablet {
         maxRowNumber);
   }
 
+  @TsFileApi
+  public Tablet(List<String> columnNameList, List<TSDataType> dataTypeList) {
+    this(columnNameList, dataTypeList, DEFAULT_SIZE);
+  }
+
   /**
    * Return a {@link Tablet} with the specified number of rows (maxBatchSize). Only for writing in
    * DeviceTableModelWriter.
    *
-   * @param measurementList the list of measurement names for creating the row batch
+   * @param columnNameList the list of measurement names for creating the row batch
    * @param dataTypeList the list of {@link TSDataType}s for creating the row batch
    * @param maxRowNum the maximum number of rows for this tablet
    */
   @TsFileApi
-  public Tablet(List<String> measurementList, List<TSDataType> dataTypeList, int maxRowNum) {
-    this(null, measurementList, dataTypeList, null, maxRowNum, false);
+  public Tablet(List<String> columnNameList, List<TSDataType> dataTypeList, int maxRowNum) {
+    this(null, columnNameList, dataTypeList, null, maxRowNum, false);
   }
 
   public Tablet(

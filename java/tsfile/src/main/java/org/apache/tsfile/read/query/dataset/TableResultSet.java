@@ -30,7 +30,7 @@ import org.apache.tsfile.read.reader.block.TsBlockReader;
 import java.io.IOException;
 import java.util.List;
 
-public class TableResultSet extends ResultSet {
+public class TableResultSet extends AbstractResultSet {
 
   private TsBlockReader tsBlockReader;
   private IPointReader tsBlockPointReader;

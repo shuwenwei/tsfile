@@ -25,7 +25,7 @@ import org.apache.tsfile.read.common.Path;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-public class TreeResultSet extends ResultSet {
+public class TreeResultSet extends AbstractResultSet {
   private QueryDataSet queryDataSet;
 
   public TreeResultSet(QueryDataSet queryDataSet) {

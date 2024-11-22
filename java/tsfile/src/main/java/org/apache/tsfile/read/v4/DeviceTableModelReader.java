@@ -24,68 +24,62 @@ import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.exception.read.ReadProcessException;
 import org.apache.tsfile.exception.write.NoMeasurementException;
 import org.apache.tsfile.exception.write.NoTableException;
-import org.apache.tsfile.file.metadata.IDeviceID;
-import org.apache.tsfile.file.metadata.MetadataIndexNode;
 import org.apache.tsfile.file.metadata.TableSchema;
 import org.apache.tsfile.file.metadata.TsFileMetadata;
+import org.apache.tsfile.read.TsFileSequenceReader;
+import org.apache.tsfile.read.controller.CachedChunkLoaderImpl;
+import org.apache.tsfile.read.controller.IChunkLoader;
+import org.apache.tsfile.read.controller.IMetadataQuerier;
+import org.apache.tsfile.read.controller.MetadataQuerierByFileImpl;
 import org.apache.tsfile.read.expression.ExpressionTree;
 import org.apache.tsfile.read.query.dataset.ResultSet;
 import org.apache.tsfile.read.query.dataset.TableResultSet;
 import org.apache.tsfile.read.query.executor.TableQueryExecutor;
 import org.apache.tsfile.read.reader.block.TsBlockReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-public class DeviceTableModelReader extends CommonModelReader {
+public class DeviceTableModelReader implements ITsFileReader {
+
+  protected TsFileSequenceReader fileReader;
+  protected IMetadataQuerier metadataQuerier;
+  protected IChunkLoader chunkLoader;
   protected TableQueryExecutor queryExecutor;
+  private static final Logger LOG = LoggerFactory.getLogger(DeviceTableModelReader.class);
 
   public DeviceTableModelReader(File file) throws IOException {
-    super(file);
+    this.fileReader = new TsFileSequenceReader(file.getPath());
+    this.metadataQuerier = new MetadataQuerierByFileImpl(fileReader);
+    this.chunkLoader = new CachedChunkLoaderImpl(fileReader);
     this.queryExecutor =
         new TableQueryExecutor(
             metadataQuerier, chunkLoader, TableQueryExecutor.TableQueryOrdering.DEVICE);
   }
 
   @TsFileApi
-  public List<String> getAllTables() throws IOException {
+  public List<TableSchema> getAllTableSchema() throws IOException {
     Map<String, TableSchema> tableSchemaMap = fileReader.readFileMetadata().getTableSchemaMap();
-    return new ArrayList<>(tableSchemaMap.keySet());
+    return new ArrayList<>(tableSchemaMap.values());
   }
 
   @TsFileApi
-  public List<IDeviceID> getAllTableDevices(String tableName) throws IOException {
-    MetadataIndexNode tableMetadataIndexNode =
-        fileReader.readFileMetadata().getTableMetadataIndexNode(tableName);
-    if (tableMetadataIndexNode == null) {
-      return Collections.emptyList();
-    }
-    return fileReader.getAllDevices(tableMetadataIndexNode);
-  }
-
-  @TsFileApi
-  public List<TableSchema> getTableSchema(List<String> tableNames) throws IOException {
+  public Optional<TableSchema> getTableSchemas(String tableName) throws IOException {
     TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
     Map<String, TableSchema> tableSchemaMap = tsFileMetadata.getTableSchemaMap();
-    List<TableSchema> result = new ArrayList<>(tableNames.size());
-    for (String tableName : tableNames) {
-      result.add(tableSchemaMap.get(tableName));
-    }
-    return result;
+    return Optional.ofNullable(tableSchemaMap.get(tableName));
   }
 
   @TsFileApi
-  public ResultSet queryTable(
-      String tableName,
-      List<String> columnNames,
-      List<IDeviceID> deviceIds,
-      long startTime,
-      long endTime)
-      throws ReadProcessException, IOException, NoTableException, NoMeasurementException {
+  public ResultSet query(String tableName, List<String> columnNames, long startTime, long endTime)
+      throws IOException, NoTableException, NoMeasurementException, ReadProcessException {
     TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
     TableSchema tableSchema = tsFileMetadata.getTableSchemaMap().get(tableName);
     if (tableSchema == null) {
@@ -105,8 +99,17 @@ public class DeviceTableModelReader extends CommonModelReader {
             tableName,
             columnNames,
             new ExpressionTree.TimeBetweenAnd(startTime, endTime),
-            new ExpressionTree.IdColumnMatch(deviceIds),
+            null,
             null);
     return new TableResultSet(tsBlockReader, columnNames, dataTypeList);
+  }
+
+  @Override
+  public void close() {
+    try {
+      this.fileReader.close();
+    } catch (IOException e) {
+      LOG.warn("Meet exception when close file reader: ", e);
+    }
   }
 }
