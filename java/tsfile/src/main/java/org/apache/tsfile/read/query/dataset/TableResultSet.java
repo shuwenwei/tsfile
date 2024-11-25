@@ -27,10 +27,14 @@ import org.apache.tsfile.read.common.block.TsBlock;
 import org.apache.tsfile.read.reader.IPointReader;
 import org.apache.tsfile.read.reader.block.TsBlockReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.List;
 
 public class TableResultSet extends AbstractResultSet {
+  private static final Logger LOG = LoggerFactory.getLogger(TableResultSet.class);
 
   private TsBlockReader tsBlockReader;
   private IPointReader tsBlockPointReader;
@@ -71,5 +75,14 @@ public class TableResultSet extends AbstractResultSet {
   }
 
   @Override
-  public void close() {}
+  public void close() {
+    if (tsBlockReader == null) {
+      return;
+    }
+    try {
+      tsBlockReader.close();
+    } catch (Exception e) {
+      LOG.error("Failed to close tsBlockReader");
+    }
+  }
 }

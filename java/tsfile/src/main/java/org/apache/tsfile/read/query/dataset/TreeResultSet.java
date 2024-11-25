@@ -48,5 +48,7 @@ public class TreeResultSet extends AbstractResultSet {
   }
 
   @TsFileApi
-  public void close() {}
+  public void close() {
+    // nothing to be done
+  }
 }
