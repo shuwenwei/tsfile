@@ -176,7 +176,13 @@ public class BitMap {
       return false;
     }
     BitMap other = (BitMap) obj;
-    // implement
+    if (rangeSize > size || rangeSize > other.size) {
+      throw new IllegalArgumentException(
+          "range size "
+              + rangeSize
+              + " should <= the minimal bitmap size "
+              + Math.min(this.size, other.size));
+    }
 
     int byteSize = rangeSize / Byte.SIZE;
     for (int i = 0; i < byteSize; i++) {

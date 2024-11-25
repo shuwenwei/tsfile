@@ -49,12 +49,9 @@ public class DeviceTableModelWriter extends AbstractTableModelTsFileWriter {
 
   /**
    * Write the tablet in to the TsFile with the table-view. The method will try to split the tablet
-   * by device. If you know the device association within the tablet, please use writeTable(Tablet
-   * tablet, List<Pair<IDeviceID, Integer>> deviceIdEndIndexPairs). One typical case where the other
-   * method should be used is that all rows in the tablet belong to the same device.
+   * by device.
    *
    * @param table data to write
-   * @return true if a flush is triggered after write, false otherwise
    * @throws IOException if the file cannot be written
    * @throws WriteProcessException if the schema is not registered first
    */

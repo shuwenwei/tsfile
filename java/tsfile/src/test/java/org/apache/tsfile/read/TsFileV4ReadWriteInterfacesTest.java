@@ -48,7 +48,23 @@ public class TsFileV4ReadWriteInterfacesTest {
   public void testGetTableDeviceMethods() throws Exception {
     String filePath = TsFileGeneratorForTest.getTestTsFilePath("root.testsg", 0, 0, 0);
     try {
-      File file = TsFileGeneratorUtils.generateAlignedTsFile(filePath, 5, 1, 10, 1, 1, 10, 100);
+      int deviceNum = 5;
+      int measurementNum = 1;
+      int pointNum = 10;
+      long startTime = 1;
+      int startValue = 1;
+      int chunkGroupSize = 10;
+      int pageSize = 100;
+      File file =
+          TsFileGeneratorUtils.generateAlignedTsFile(
+              filePath,
+              deviceNum,
+              measurementNum,
+              pointNum,
+              startTime,
+              startValue,
+              chunkGroupSize,
+              pageSize);
       List<IDeviceID> deviceIDList = new ArrayList<>();
       TableSchema tableSchema =
           new TableSchema(

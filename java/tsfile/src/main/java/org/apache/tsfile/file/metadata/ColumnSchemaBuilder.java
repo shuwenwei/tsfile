@@ -31,13 +31,16 @@ public class ColumnSchemaBuilder {
 
   @TsFileApi
   public ColumnSchema build() {
-    validateNameParameters();
+    validateParameters();
     return new ColumnSchema(columnName, columnDataType, columnCategory);
   }
 
   @TsFileApi
   public ColumnSchemaBuilder name(String columnName) {
-    this.columnName = columnName;
+    this.columnName = columnName == null ? null : columnName.trim();
+    if (this.columnName == null || this.columnName.isEmpty()) {
+      throw new IllegalArgumentException("Column name must be a non empty string");
+    }
     return this;
   }
 
@@ -53,8 +56,8 @@ public class ColumnSchemaBuilder {
     return this;
   }
 
-  private void validateNameParameters() {
-    if (columnName == null || columnName.trim().isEmpty()) {
+  private void validateParameters() {
+    if (columnName == null) {
       throw new IllegalStateException("Column name must be set before building");
     }
     if (columnDataType == null) {

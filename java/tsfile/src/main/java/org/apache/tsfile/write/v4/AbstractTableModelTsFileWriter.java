@@ -159,7 +159,7 @@ abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
   }
 
   /**
-   * calculate total memory size occupied by allT ChunkGroupWriter instances currently.
+   * calculate total memory size occupied by all ChunkGroupWriter instances currently.
    *
    * @return total memory size used
    */
@@ -175,35 +175,30 @@ abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
    * check occupied memory size, if it exceeds the chunkGroupSize threshold, flush them to given
    * OutputStream.
    *
-   * @return true - size of tsfile or metadata reaches the threshold. false - otherwise
    * @throws IOException exception in IO
    */
-  protected boolean checkMemorySizeAndMayFlushChunks() throws IOException {
+  protected void checkMemorySizeAndMayFlushChunks() throws IOException {
     if (recordCount >= recordCountForNextMemCheck) {
       long memSize = calculateMemSizeForAllGroup();
       assert memSize > 0;
       if (memSize > chunkGroupSizeThreshold) {
         LOG.debug("start to flush chunk groups, memory space occupy:{}", memSize);
         recordCountForNextMemCheck = recordCount * chunkGroupSizeThreshold / memSize;
-        return flush();
+        flush();
       } else {
         recordCountForNextMemCheck = recordCount * chunkGroupSizeThreshold / memSize;
-        return false;
       }
     }
-    return false;
   }
 
   /**
    * flush the data in all series writers of all chunk group writers and their page writers to
    * outputStream.
    *
-   * @return true - size of tsfile or metadata reaches the threshold. false - otherwise. But this
-   *     function just return false, the Override of IoTDB may return true.
    * @throws IOException exception in IO
    */
   @TsFileApi
-  protected boolean flush() throws IOException {
+  protected void flush() throws IOException {
     if (recordCount > 0) {
       for (Map.Entry<IDeviceID, IChunkGroupWriter> entry : groupWriters.entrySet()) {
         IDeviceID deviceId = entry.getKey();
@@ -241,7 +236,6 @@ abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
       }
       reset();
     }
-    return false;
   }
 
   protected void reset() {
@@ -249,11 +243,6 @@ abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
     recordCount = 0;
   }
 
-  /**
-   * this function is only for Test.
-   *
-   * @return TsFileIOWriter
-   */
   protected TsFileIOWriter getIOWriter() {
     return this.fileWriter;
   }
