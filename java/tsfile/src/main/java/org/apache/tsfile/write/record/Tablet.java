@@ -602,7 +602,7 @@ public class Tablet {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(false), stream);
         } else {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(true), stream);
-          ReadWriteIOUtils.write(bitMaps[i].getTruncatedSize(rowSize), stream);
+          ReadWriteIOUtils.write(rowSize, stream);
           ReadWriteIOUtils.write(new Binary(bitMaps[i].getTruncatedByteArray(rowSize)), stream);
         }
       }
