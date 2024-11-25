@@ -121,8 +121,9 @@ public class ITsFileReaderAndITsFileWriter {
     }
 
     // file is a required parameter
-    try (ITsFileReader reader = new TsFileReaderBuilder().file(f).build()) {
-      ResultSet resultSet = reader.query(tableName, Arrays.asList("id1", "id2", "s1", "s2"), 2, 8);
+    try (ITsFileReader reader = new TsFileReaderBuilder().file(f).build();
+        ResultSet resultSet =
+            reader.query(tableName, Arrays.asList("id1", "id2", "s1", "s2"), 2, 8)) {
       // first column is Time
       ResultSetMetadata metadata = resultSet.getMetadata();
       System.out.println(metadata);

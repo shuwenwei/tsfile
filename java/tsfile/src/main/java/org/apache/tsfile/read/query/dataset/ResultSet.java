@@ -24,7 +24,7 @@ import org.apache.tsfile.common.TsFileApi;
 import java.io.IOException;
 import java.time.LocalDate;
 
-public interface ResultSet {
+public interface ResultSet extends AutoCloseable {
 
   @TsFileApi
   ResultSetMetadata getMetadata();
