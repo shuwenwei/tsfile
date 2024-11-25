@@ -80,7 +80,6 @@ public class TableResultSet extends AbstractResultSet {
       return;
     }
     try {
-      // nothing to do
       tsBlockReader.close();
     } catch (Exception e) {
       LOG.error("Failed to close tsBlockReader");

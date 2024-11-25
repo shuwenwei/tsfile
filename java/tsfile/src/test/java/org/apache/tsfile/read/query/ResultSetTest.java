@@ -98,9 +98,10 @@ public class ResultSetTest {
       writer.write(tablet);
     }
 
-    try (DeviceTableModelReader tsFileReader = new DeviceTableModelReader(tsfile)) {
+    try (DeviceTableModelReader tsFileReader = new DeviceTableModelReader(tsfile);
+        ResultSet resultSet =
+            tsFileReader.query("t1", Arrays.asList("id1", "id2", "s2", "s1"), 0, 2); ) {
       // id1 id2 s2 s1
-      ResultSet resultSet = tsFileReader.query("t1", Arrays.asList("id1", "id2", "s2", "s1"), 0, 2);
       ResultSetMetadata resultSetMetadata = resultSet.getMetadata();
       // Time id1 id2 s2 s1
       Assert.assertEquals("Time", resultSetMetadata.getColumnName(1));
