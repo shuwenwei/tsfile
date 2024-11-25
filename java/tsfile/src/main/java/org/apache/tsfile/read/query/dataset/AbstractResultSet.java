@@ -21,6 +21,7 @@ package org.apache.tsfile.read.query.dataset;
 
 import org.apache.tsfile.common.TsFileApi;
 import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.exception.NullFieldException;
 import org.apache.tsfile.read.common.Field;
 import org.apache.tsfile.read.common.RowRecord;
 
@@ -63,7 +64,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public int getInt(int columnIndex) {
-    return getField(columnIndex).getIntV();
+    return getNonNullField(columnIndex).getIntV();
   }
 
   @TsFileApi
@@ -74,7 +75,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public long getLong(int columnIndex) {
-    return getField(columnIndex).getLongV();
+    return getNonNullField(columnIndex).getLongV();
   }
 
   @TsFileApi
@@ -85,7 +86,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public float getFloat(int columnIndex) {
-    return getField(columnIndex).getFloatV();
+    return getNonNullField(columnIndex).getFloatV();
   }
 
   @TsFileApi
@@ -96,7 +97,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public double getDouble(int columnIndex) {
-    return getField(columnIndex).getDoubleV();
+    return getNonNullField(columnIndex).getDoubleV();
   }
 
   @TsFileApi
@@ -107,7 +108,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public boolean getBoolean(int columnIndex) {
-    return getField(columnIndex).getBoolV();
+    return getNonNullField(columnIndex).getBoolV();
   }
 
   @TsFileApi
@@ -118,7 +119,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public String getString(int columnIndex) {
-    return getField(columnIndex).getStringValue();
+    return getNonNullField(columnIndex).getStringValue();
   }
 
   @TsFileApi
@@ -129,7 +130,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public LocalDate getDate(int columnIndex) {
-    return getField(columnIndex).getDateV();
+    return getNonNullField(columnIndex).getDateV();
   }
 
   @TsFileApi
@@ -140,12 +141,16 @@ public abstract class AbstractResultSet implements ResultSet {
 
   @TsFileApi
   public byte[] getBinary(int columnIndex) {
-    return getField(columnIndex).getBinaryV().getValues();
+    return getNonNullField(columnIndex).getBinaryV().getValues();
   }
 
   @TsFileApi
   public boolean isNull(String columnName) {
     Integer columnIndex = columnNameToColumnIndexMap.get(columnName);
+    if (columnIndex == null) {
+      throw new IllegalArgumentException(
+          "Can't find columnName " + columnName + " from result set");
+    }
     return isNull(columnIndex);
   }
 
@@ -154,7 +159,18 @@ public abstract class AbstractResultSet implements ResultSet {
     return getField(columnIndex) == null;
   }
 
+  protected Field getNonNullField(int columnIndex) {
+    Field field = getField(columnIndex);
+    if (field == null) {
+      throw new NullFieldException("Field in columnIndex " + columnIndex + " is null");
+    }
+    return field;
+  }
+
   protected Field getField(int columnIndex) {
+    if (columnIndex > this.columnNameToColumnIndexMap.size()) {
+      throw new IndexOutOfBoundsException("column index " + columnIndex + " out of bound");
+    }
     Field field;
     if (columnIndex == 1) {
       field = new Field(TSDataType.INT64);
