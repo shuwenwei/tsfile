@@ -89,7 +89,6 @@ abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
 
     this.pageSize = conf.getPageSizeInByte();
     this.chunkGroupSizeThreshold = chunkGroupSizeThreshold;
-    config.setTSFileStorageFs(conf.getTSFileStorageFs());
     if (this.pageSize >= chunkGroupSizeThreshold) {
       LOG.warn(
           "TsFile's page size {} is greater than chunk group size {}, please enlarge the chunk group"
@@ -180,7 +179,6 @@ abstract class AbstractTableModelTsFileWriter implements ITsFileWriter {
   protected void checkMemorySizeAndMayFlushChunks() throws IOException {
     if (recordCount >= recordCountForNextMemCheck) {
       long memSize = calculateMemSizeForAllGroup();
-      assert memSize > 0;
       if (memSize > chunkGroupSizeThreshold) {
         LOG.debug("start to flush chunk groups, memory space occupy:{}", memSize);
         recordCountForNextMemCheck = recordCount * chunkGroupSizeThreshold / memSize;
