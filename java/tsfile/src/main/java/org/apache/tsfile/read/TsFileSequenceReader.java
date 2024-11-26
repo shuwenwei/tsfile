@@ -560,6 +560,55 @@ public class TsFileSequenceReader implements AutoCloseable {
   }
 
   /**
+   * Read the TimeseriesMetadata of the given measurement and its successors from the index node
+   * into the list.
+   *
+   * @param timeseriesMetadataList result holder
+   * @param node index node to be read from
+   * @param measurement the desired measurement
+   * @return true if the measurement exists
+   * @throws IOException when read fails
+   */
+  public boolean readITimeseriesMetadata(
+      List<TimeseriesMetadata> timeseriesMetadataList, MetadataIndexNode node, String measurement)
+      throws IOException {
+    Pair<IMetadataIndexEntry, Long> measurementMetadataIndexPair =
+        getMetadataAndEndOffsetOfMeasurementNode(node, measurement, true);
+
+    if (measurementMetadataIndexPair == null) {
+      return false;
+    }
+    long startOffset = measurementMetadataIndexPair.getLeft().getOffset();
+    long endOffset = measurementMetadataIndexPair.getRight();
+    TimeseriesMetadata timeseriesMetadata;
+    if (endOffset - startOffset >= Integer.MAX_VALUE) {
+      synchronized (this) {
+        this.position(startOffset);
+        try {
+          timeseriesMetadata = TimeseriesMetadata.deserializeFrom(tsFileInput, true);
+        } catch (Exception e) {
+          logger.error(
+              "Something error happened while deserializing TimeseriesMetadata of file {}", file);
+          throw e;
+        }
+      }
+    } else {
+      try {
+        ByteBuffer buffer =
+            readData(
+                measurementMetadataIndexPair.left.getOffset(), measurementMetadataIndexPair.right);
+        timeseriesMetadata = TimeseriesMetadata.deserializeFrom(buffer, true);
+      } catch (Exception e) {
+        logger.error(
+            "Something error happened while deserializing TimeseriesMetadata of file {}", file);
+        throw e;
+      }
+    }
+    timeseriesMetadataList.add(timeseriesMetadata);
+    return true;
+  }
+
+  /**
    * Find the leaf node that contains path, return all the sensors in that leaf node which are also
    * in allSensors set
    *
