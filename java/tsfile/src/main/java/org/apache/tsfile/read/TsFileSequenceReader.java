@@ -573,7 +573,7 @@ public class TsFileSequenceReader implements AutoCloseable {
       List<TimeseriesMetadata> timeseriesMetadataList, MetadataIndexNode node, String measurement)
       throws IOException {
     Pair<IMetadataIndexEntry, Long> measurementMetadataIndexPair =
-        getMetadataAndEndOffsetOfMeasurementNode(node, measurement, true);
+        getMetadataAndEndOffsetOfMeasurementNode(node, measurement, true, null);
 
     if (measurementMetadataIndexPair == null) {
       return false;
