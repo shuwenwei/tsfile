@@ -74,7 +74,7 @@ public class DeviceTableModelReader implements ITsFileReader {
   public Optional<TableSchema> getTableSchemas(String tableName) throws IOException {
     TsFileMetadata tsFileMetadata = fileReader.readFileMetadata();
     Map<String, TableSchema> tableSchemaMap = tsFileMetadata.getTableSchemaMap();
-    return Optional.ofNullable(tableSchemaMap.get(tableName));
+    return Optional.ofNullable(tableSchemaMap.get(tableName.toLowerCase()));
   }
 
   @TsFileApi
