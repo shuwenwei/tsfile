@@ -60,18 +60,38 @@ public class TableSchema {
     this.updatable = true;
   }
 
+  // for deserialize
   public TableSchema(
-      String tableName,
-      List<IMeasurementSchema> columnSchemas,
-      List<ColumnCategory> columnCategories) {
-    this.tableName = tableName == null ? null : tableName.toLowerCase();
+      List<IMeasurementSchema> columnSchemas, List<ColumnCategory> columnCategories) {
     this.measurementSchemas =
         columnSchemas.stream()
             .map(
                 measurementSchema ->
                     new MeasurementSchema(
                         measurementSchema.getMeasurementName().toLowerCase(),
-                        measurementSchema.getType()))
+                        measurementSchema.getType(),
+                        measurementSchema.getEncodingType(),
+                        measurementSchema.getCompressor(),
+                        measurementSchema.getProps()))
+            .collect(Collectors.toList());
+    this.columnCategories = columnCategories;
+  }
+
+  public TableSchema(
+      String tableName,
+      List<IMeasurementSchema> columnSchemas,
+      List<ColumnCategory> columnCategories) {
+    this.tableName = tableName.toLowerCase();
+    this.measurementSchemas =
+        columnSchemas.stream()
+            .map(
+                measurementSchema ->
+                    new MeasurementSchema(
+                        measurementSchema.getMeasurementName().toLowerCase(),
+                        measurementSchema.getType(),
+                        measurementSchema.getEncodingType(),
+                        measurementSchema.getCompressor(),
+                        measurementSchema.getProps()))
             .collect(Collectors.toList());
     this.columnCategories = columnCategories;
   }
@@ -81,7 +101,7 @@ public class TableSchema {
       List<String> columnNameList,
       List<TSDataType> dataTypeList,
       List<ColumnCategory> categoryList) {
-    this.tableName = tableName == null ? null : tableName.toLowerCase();
+    this.tableName = tableName.toLowerCase();
     this.measurementSchemas = new ArrayList<>(columnNameList.size());
     for (int i = 0; i < columnNameList.size(); i++) {
       measurementSchemas.add(
@@ -92,7 +112,7 @@ public class TableSchema {
 
   @TsFileApi
   public TableSchema(String tableName, List<ColumnSchema> columnSchemaList) {
-    this.tableName = tableName == null ? null : tableName.toLowerCase();
+    this.tableName = tableName.toLowerCase();
     this.measurementSchemas = new ArrayList<>(columnSchemaList.size());
     this.columnCategories = new ArrayList<>(columnSchemaList.size());
     for (ColumnSchema columnSchema : columnSchemaList) {
@@ -242,7 +262,7 @@ public class TableSchema {
       measurementSchemas.add(measurementSchema);
       columnCategories.add(ColumnCategory.values()[buffer.getInt()]);
     }
-    return new TableSchema(null, measurementSchemas, columnCategories);
+    return new TableSchema(measurementSchemas, columnCategories);
   }
 
   public String getTableName() {
