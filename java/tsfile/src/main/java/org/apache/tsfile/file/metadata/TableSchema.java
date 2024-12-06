@@ -54,7 +54,7 @@ public class TableSchema {
   private Map<String, Integer> idColumnOrder;
 
   public TableSchema(String tableName) {
-    this.tableName = tableName == null ? null : tableName.toLowerCase();
+    this.tableName = tableName.toLowerCase();
     this.measurementSchemas = new ArrayList<>();
     this.columnCategories = new ArrayList<>();
     this.updatable = true;
