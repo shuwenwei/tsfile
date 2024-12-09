@@ -24,9 +24,12 @@ import org.apache.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.tsfile.utils.BitMap;
 import org.apache.tsfile.write.schema.MeasurementSchema;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,5 +109,28 @@ public class TabletTest {
       e.printStackTrace();
       fail();
     }
+  }
+
+  @Test
+  public void testSerializeDateColumnWithNullValue() throws IOException {
+    final List<MeasurementSchema> measurementSchemas = new ArrayList<>();
+    measurementSchemas.add(new MeasurementSchema("s1", TSDataType.DATE, TSEncoding.PLAIN));
+    measurementSchemas.add(new MeasurementSchema("s2", TSDataType.DATE, TSEncoding.PLAIN));
+    Tablet tablet = new Tablet("root.testsg.d1", measurementSchemas);
+    tablet.addTimestamp(0, 0);
+    tablet.addValue("s1", 0, LocalDate.now());
+    tablet.addValue("s2", 0, null);
+    tablet.addTimestamp(1, 1);
+    tablet.addValue("s1", 1, LocalDate.now());
+    tablet.addValue("s2", 1, null);
+    tablet.rowSize = 2;
+    ByteBuffer serialized = tablet.serialize();
+    Tablet deserializeTablet = Tablet.deserialize(serialized);
+    Assert.assertEquals(
+        ((LocalDate[]) tablet.values[0])[0], ((LocalDate[]) deserializeTablet.values[0])[0]);
+    Assert.assertTrue(deserializeTablet.bitMaps[1].isMarked(0));
+    Assert.assertEquals(
+        ((LocalDate[]) tablet.values[1])[1], ((LocalDate[]) deserializeTablet.values[1])[1]);
+    Assert.assertTrue(deserializeTablet.bitMaps[0].isMarked(1));
   }
 }
