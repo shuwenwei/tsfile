@@ -121,8 +121,8 @@ public class TabletTest {
     tablet.addValue("s1", 0, LocalDate.now());
     tablet.addValue("s2", 0, null);
     tablet.addTimestamp(1, 1);
-    tablet.addValue("s1", 1, LocalDate.now());
-    tablet.addValue("s2", 1, null);
+    tablet.addValue("s1", 1, null);
+    tablet.addValue("s2", 1, LocalDate.now());
     tablet.rowSize = 2;
     ByteBuffer serialized = tablet.serialize();
     Tablet deserializeTablet = Tablet.deserialize(serialized);
