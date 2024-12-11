@@ -29,5 +29,5 @@ import java.lang.annotation.Target;
  * TableModel.
  */
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface TableModel {}
