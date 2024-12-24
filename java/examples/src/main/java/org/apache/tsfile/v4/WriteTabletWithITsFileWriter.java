@@ -56,17 +56,17 @@ public class WriteTabletWithITsFileWriter {
                 new ColumnSchemaBuilder()
                     .name("id1")
                     .dataType(TSDataType.STRING)
-                    .category(Tablet.ColumnCategory.ID)
+                    .category(Tablet.ColumnCategory.TAG)
                     .build(),
                 new ColumnSchemaBuilder()
                     .name("id2")
                     .dataType(TSDataType.STRING)
-                    .category(Tablet.ColumnCategory.ID)
+                    .category(Tablet.ColumnCategory.TAG)
                     .build(),
                 new ColumnSchemaBuilder()
                     .name("s1")
                     .dataType(TSDataType.INT32)
-                    .category(Tablet.ColumnCategory.MEASUREMENT)
+                    .category(Tablet.ColumnCategory.FIELD)
                     .build(),
                 new ColumnSchemaBuilder().name("s2").dataType(TSDataType.BOOLEAN).build()));
 
