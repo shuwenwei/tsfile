@@ -920,7 +920,7 @@ public class TsFileWriteApiTest {
             "TABLE1",
             Arrays.asList("IdColumn", "MeasurementColumn"),
             Arrays.asList(TSDataType.STRING, TSDataType.BOOLEAN),
-            Arrays.asList(Tablet.ColumnCategory.ID, Tablet.ColumnCategory.MEASUREMENT));
+            Arrays.asList(Tablet.ColumnCategory.TAG, Tablet.ColumnCategory.FIELD));
     tablet.addTimestamp(0, 0);
     tablet.addValue("IdColumn", 0, "id_field");
     tablet.addValue("MeasurementColumn", 0, true);
@@ -928,9 +928,9 @@ public class TsFileWriteApiTest {
         new TableSchema(
             "Table1",
             Arrays.asList(
-                new ColumnSchema("IDCOLUMN", TSDataType.STRING, Tablet.ColumnCategory.ID),
+                new ColumnSchema("IDCOLUMN", TSDataType.STRING, Tablet.ColumnCategory.TAG),
                 new ColumnSchema(
-                    "MeasurementColumn", TSDataType.BOOLEAN, Tablet.ColumnCategory.MEASUREMENT)));
+                    "MeasurementColumn", TSDataType.BOOLEAN, Tablet.ColumnCategory.FIELD)));
     Assert.assertEquals("table1", tableSchema.getTableName());
     try (TsFileWriter writer = new TsFileWriter(f)) {
       writer.registerTableSchema(tableSchema);

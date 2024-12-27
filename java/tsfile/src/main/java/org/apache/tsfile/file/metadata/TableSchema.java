@@ -19,7 +19,7 @@
 
 package org.apache.tsfile.file.metadata;
 
-import org.apache.tsfile.common.TsFileApi;
+import org.apache.tsfile.annotations.TsFileApi;
 import org.apache.tsfile.compatibility.DeserializeConfig;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.utils.ReadWriteForEncodingUtils;
@@ -206,9 +206,9 @@ public class TableSchema {
               int columnOrder = 0;
               for (int i = 0; i < measurementSchemas.size(); i++) {
                 if (measurementSchemas.get(i).getMeasurementName().equals(lowerCaseColumnName)
-                    && columnCategories.get(i) == ColumnCategory.ID) {
+                    && columnCategories.get(i) == ColumnCategory.TAG) {
                   return columnOrder;
-                } else if (columnCategories.get(i) == ColumnCategory.ID) {
+                } else if (columnCategories.get(i) == ColumnCategory.TAG) {
                   columnOrder++;
                 }
               }
@@ -231,7 +231,7 @@ public class TableSchema {
       // if the measurement is not found in the column list, add it
       if (columnIndex == -1) {
         measurementSchemas.add(chunkMetadata.toMeasurementSchema());
-        columnCategories.add(ColumnCategory.MEASUREMENT);
+        columnCategories.add(ColumnCategory.FIELD);
         getColumnPosIndex().put(chunkMetadata.getMeasurementUid(), measurementSchemas.size() - 1);
       } else {
         final IMeasurementSchema originSchema = measurementSchemas.get(columnIndex);
