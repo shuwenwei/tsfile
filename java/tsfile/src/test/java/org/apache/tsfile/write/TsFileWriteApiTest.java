@@ -18,7 +18,6 @@
  */
 package org.apache.tsfile.write;
 
-import org.apache.tsfile.common.conf.TSFileConfig;
 import org.apache.tsfile.common.conf.TSFileDescriptor;
 import org.apache.tsfile.enums.TSDataType;
 import org.apache.tsfile.exception.write.WriteProcessException;
@@ -37,7 +36,6 @@ import org.apache.tsfile.read.common.Chunk;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.expression.QueryExpression;
 import org.apache.tsfile.read.query.dataset.QueryDataSet;
-import org.apache.tsfile.utils.Binary;
 import org.apache.tsfile.utils.TsFileGeneratorUtils;
 import org.apache.tsfile.write.chunk.AlignedChunkWriterImpl;
 import org.apache.tsfile.write.chunk.ChunkWriterImpl;
@@ -404,9 +402,6 @@ public class TsFileWriteApiTest {
       tsFileWriter.registerTimeseries(new Path(deviceId), measurementSchemas);
 
       Tablet tablet = new Tablet(deviceId, measurementSchemas);
-      long[] timestamps = tablet.timestamps;
-      Object[] values = tablet.values;
-      tablet.initBitMaps();
       int sensorNum = measurementSchemas.size();
       long startTime = 0;
       for (long r = 0; r < 10000; r++) {
@@ -417,14 +412,12 @@ public class TsFileWriteApiTest {
             tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
-          Binary[] textSensor = (Binary[]) values[i];
-          textSensor[row] = new Binary("testString.........", TSFileConfig.STRING_CHARSET);
+          tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
           tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
-          LocalDate[] dateSensor = (LocalDate[]) values[sensorNum - 1];
-          dateSensor[row] = LocalDate.of(2024, 4, 1);
+          tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
         // write
         if (tablet.getRowSize() == tablet.getMaxRowNumber()) {
@@ -457,8 +450,6 @@ public class TsFileWriteApiTest {
       tsFileWriter.registerTimeseries(new Path(deviceId), measurementSchemas);
 
       Tablet tablet = new Tablet(deviceId, measurementSchemas);
-      long[] timestamps = tablet.timestamps;
-      Object[] values = tablet.values;
       tablet.initBitMaps();
       int sensorNum = measurementSchemas.size();
       long startTime = -100;
@@ -470,14 +461,12 @@ public class TsFileWriteApiTest {
             tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
-          Binary[] textSensor = (Binary[]) values[i];
-          textSensor[row] = new Binary("testString.........", TSFileConfig.STRING_CHARSET);
+          tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
           tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
-          LocalDate[] dateSensor = (LocalDate[]) values[sensorNum - 1];
-          dateSensor[row] = LocalDate.of(2024, 4, 1);
+          tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
         // write
         if (tablet.getRowSize() == tablet.getMaxRowNumber()) {
@@ -510,28 +499,23 @@ public class TsFileWriteApiTest {
       tsFileWriter.registerAlignedTimeseries(new Path(deviceId), measurementSchemas);
 
       Tablet tablet = new Tablet(deviceId, measurementSchemas);
-      long[] timestamps = tablet.timestamps;
-      Object[] values = tablet.values;
       tablet.initBitMaps();
       int sensorNum = measurementSchemas.size();
       long startTime = 0;
       for (long r = 0; r < 10000; r++) {
         int row = tablet.getRowSize();
         tablet.addTimestamp(row, startTime++);
-        timestamps[row] = startTime++;
         for (int i = 0; i < sensorNum - 1; i++) {
           if (i == 1 && r > 1000) {
             tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
-          Binary[] textSensor = (Binary[]) values[i];
-          textSensor[row] = new Binary("testString.........", TSFileConfig.STRING_CHARSET);
+          tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
           tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
-          LocalDate[] dateSensor = (LocalDate[]) values[sensorNum - 1];
-          dateSensor[row] = LocalDate.of(2024, 4, 1);
+          tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
         // write
         if (tablet.getRowSize() == tablet.getMaxRowNumber()) {
@@ -589,8 +573,6 @@ public class TsFileWriteApiTest {
       tsFileWriter.registerAlignedTimeseries(new Path(deviceId), measurementSchemas);
 
       Tablet tablet = new Tablet(deviceId, measurementSchemas);
-      long[] timestamps = tablet.timestamps;
-      Object[] values = tablet.values;
       tablet.initBitMaps();
       int sensorNum = measurementSchemas.size();
       long startTime = -1000;
@@ -602,14 +584,12 @@ public class TsFileWriteApiTest {
             tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
-          Binary[] textSensor = (Binary[]) values[i];
-          textSensor[row] = new Binary("testString.........", TSFileConfig.STRING_CHARSET);
+          tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
           tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
-          LocalDate[] dateSensor = (LocalDate[]) values[sensorNum - 1];
-          dateSensor[row] = LocalDate.of(2024, 4, 1);
+          tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
         // write
         if (tablet.getRowSize() == tablet.getMaxRowNumber()) {

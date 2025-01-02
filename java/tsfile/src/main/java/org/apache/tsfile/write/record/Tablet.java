@@ -292,6 +292,7 @@ public class Tablet {
   public void addTimestamp(int rowIndex, long timestamp) {
     timestamps[rowIndex] = timestamp;
     this.rowSize = Math.max(this.rowSize, rowIndex + 1);
+    initBitMapsWithApiUsage();
   }
 
   public void addValue(final String measurementId, final int rowIndex, final Object value) {
@@ -521,6 +522,15 @@ public class Tablet {
   }
 
   private void updateBitMap(int rowIndex, int columnIndex, boolean mark) {
+    initBitMapsWithApiUsage();
+    if (mark) {
+      bitMaps[columnIndex].mark(rowIndex);
+    } else {
+      bitMaps[columnIndex].unmark(rowIndex);
+    }
+  }
+
+  private void initBitMapsWithApiUsage() {
     if (bitMaps == null) {
       initBitMaps();
     }
@@ -529,11 +539,6 @@ public class Tablet {
       for (BitMap bitMap : bitMaps) {
         bitMap.markAll();
       }
-    }
-    if (mark) {
-      bitMaps[columnIndex].mark(rowIndex);
-    } else {
-      bitMaps[columnIndex].unmark(rowIndex);
     }
   }
 
