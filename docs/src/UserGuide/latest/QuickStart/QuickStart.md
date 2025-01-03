@@ -19,6 +19,15 @@
 
 -->
 # Quick Start
+## Data Sample
+
+| time | tag1         | tag2         | field1 | field2 |
+|------|--------------|--------------|--------|--------|
+| 0    | tag1_value_1 | tag2_value_1 | 0      | true   |
+| 1    | tag1_value_1 | tag2_value_1 | 1      | true   |
+| 2    | tag1_value_1 | tag2_value_1 | 2      | true   |
+| 3    | tag1_value_1 | tag2_value_1 | 3      | true   |
+| 4    | tag1_value_1 | tag2_value_1 | 4      | true   |
 
 ## Java
 ### Installation Method
