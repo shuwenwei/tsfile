@@ -18,17 +18,13 @@
     under the License.
 
 -->
-# TsFile 快速上手
+# Quick Start
 
-## 数据示例
+## Java
+### 安装方式
+Add the following content to the `dependencies` in `pom.xml`
 
-![](https://alioss.timecho.com/docs/img/WX20240628-173452@2x.png)
-
-## 安装方式
-
-在 `pom.xml` 的 `dependencies`中添加以下内容
-
-```shell
+```xml
 <dependency>
     <groupId>org.apache.tsfile</groupId>
     <artifactId>tsfile</artifactId>
@@ -36,88 +32,121 @@
 </dependency>
 ```
 
-## 写入流程
+### 写入流程
 
-### 构造 TsFileWriter
+#### 构造 TableSchema
 
-```shell
+```java
+TableSchema tableSchema =
+        new TableSchema(
+            tableName,
+            Arrays.asList(
+                new ColumnSchemaBuilder()
+                    .name("tag1")
+                    .dataType(TSDataType.STRING)
+                    .category(Tablet.ColumnCategory.TAG)
+                    .build(),
+                new ColumnSchemaBuilder()
+                    .name("tag2")
+                    .dataType(TSDataType.STRING)
+                    .category(Tablet.ColumnCategory.TAG)
+                    .build(),
+                new ColumnSchemaBuilder()
+                    .name("field1")
+                    .dataType(TSDataType.INT32)
+                    .category(Tablet.ColumnCategory.FIELD)
+                    .build(),
+                new ColumnSchemaBuilder()
+                    .name("field2")
+                    .dataType(TSDataType.BOOLEAN)
+                    .category(Tablet.ColumnCategory.FIELD)
+                    .build()));
+```
+
+#### 构造 ITsFileWriter
+```java
 File f = new File("test.tsfile");
-TsFileWriter tsFileWriter = new TsFileWriter(f);
+ITsFileWriter writer =
+        new TsFileWriterBuilder()
+            .file(f)
+            .tableSchema(tableSchema)
+            .memoryThreshold(memoryThreshold)
+            .build();
 ```
 
-### 注册时间序列
+#### 构造 Tablet
+```java
+Tablet tablet =
+    new Tablet(
+        Arrays.asList("tag1", "tag2", "field1", "field2"),
+        Arrays.asList(
+            TSDataType.STRING, TSDataType.STRING, TSDataType.INT32, TSDataType.BOOLEAN));
+      for (int row = 0; row < 5; row++) {
+        long timestamp = row;
+        tablet.addTimestamp(row, timestamp);
+        tablet.addValue(row, "tag1", "tag1_value_1");
+        tablet.addValue(row, "tag2", "tag2_value_1");
+        tablet.addValue(row, "field1", row);
+        tablet.addValue(row, "field2", true);
+      }
+```
+#### 写入数据
 
 ```shell
-List<MeasurementSchema> schema1 = new ArrayList<>();
-schema1.add(new MeasurementSchema("电压", TSDataType.FLOAT));
-schema1.add(new MeasurementSchema("电流", TSDataType.FLOAT));
-tsFileWriter.registerTimeseries(new Path("太阳能板1"), schema1);
-
-List<MeasurementSchema> schema2 = new ArrayList<>();
-schema2.add(new MeasurementSchema("电压", TSDataType.FLOAT));
-schema2.add(new MeasurementSchema("电流", TSDataType.FLOAT));
-schema2.add(new MeasurementSchema("风速", TSDataType.FLOAT));
-tsFileWriter.registerTimeseries(new Path("风机1"), schema2);
+writer.write(tablet);
 ```
 
-### 写入数据
+#### 关闭文件
+
+```java
+writer.close();
+```
+
+#### 示例代码
+
+<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/v4/WriteTabletWithITsFileWriter.java>
+
+### 查询流程
+
+#### 构造 ITsFileReader
+
+```java
+File f = new File("test.tsfile");
+ITsFileReader reader = new TsFileReaderBuilder().file(f).build();
+```
+
+#### 查询数据
+Query tag1, tag2, field1, field2 with a time range of [1,4]
+```java
+ResultSet resultSet = reader.query(tableName, Arrays.asList("tag1", "tag2", "field1", "field2"), 1, 4);
+```
+
+#### 遍历查询结果
 
 ```shell
-TSRecord tsRecord = new TSRecord(1, "太阳能板1");
-tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.FLOAT, "电压", 1.1f));
-tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.FLOAT, "电流", 2.2f));
-tsFileWriter.write(tsRecord);
+while (resultSet.next()) {
+  // columnIndex 从 1 开始
+  // 第一列为 time 列
+  // Time tag1 tag2 field1 field2
+  Long timeField = resultSet.getLong("Time");
+  String tag1 = resultSet.isNull("tag1") ? null : resultSet.getString("tag1");
+  String tag2 = resultSet.isNull("tag2") ? null : resultSet.getString("tag2");
+  Integer s1Field = resultSet.isNull("field1") ? null : resultSet.getInt(4);
+  Boolean s2Field = resultSet.isNull("field2") ? null : resultSet.getBoolean(5);
+}  
+ ```
+
+#### 关闭 ResultSet
+```java
+resultSet.close();
 ```
 
-### 关闭文件
-
-```shell
-tsFileWriter.close();
-```
-
-### 示例代码
-
-<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/TsFileWriteWithTSRecord.java>
-
-## 查询流程
-
-### 构造 TsFileReader
-
-```shell
-TsFileSequenceReader reader = new TsFileSequenceReader(path);
-TsFileReader tsFileReader = new TsFileReader(reader);
-```
-
-### 构造查询请求
-
-```shell
-ArrayList<Path> paths = new ArrayList<>();
-paths.add(new Path("太阳能板1", "电压",true));
-paths.add(new Path("太阳能板1", "电流",true));
-
-IExpression timeFilter =
-    BinaryExpression.and(
-        new GlobalTimeExpression(TimeFilterApi.gtEq(4L)),
-        new GlobalTimeExpression(TimeFilterApi.ltEq(10L)));
-
-QueryExpression queryExpression = QueryExpression.create(paths, timeFilter);
-```
-
-### 查询数据
-
-```shell
-QueryDataSet queryDataSet = tsFileReader.query(queryExpression);
-while (queryDataSet.hasNext()) {
-  queryDataSet.next();
-}
-```
-
-### 关闭文件
+#### 关闭文件
 
 ```shell
 tsFileReader.close();
 ```
 
-### 示例代码
+#### 示例代码
+<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/v4/ITsFileReaderAndITsFileWriter.java>
 
-<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/TsFileRead.java>

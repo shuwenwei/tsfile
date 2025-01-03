@@ -20,15 +20,11 @@
 -->
 # Quick Start
 
-## Sample Data
-
-![](https://alioss.timecho.com/docs/img/2024050517481.png)
-
-## Installation Method
-
+## Java
+### Installation Method
 Add the following content to the `dependencies` in `pom.xml`
 
-```shell
+```xml
 <dependency>
     <groupId>org.apache.tsfile</groupId>
     <artifactId>tsfile</artifactId>
@@ -36,89 +32,121 @@ Add the following content to the `dependencies` in `pom.xml`
 </dependency>
 ```
 
-## Writing Process
+### Writing Process
 
-### Construct TsFileWriter
+#### Construct TableSchema
 
-```shell
+```java
+TableSchema tableSchema =
+        new TableSchema(
+            tableName,
+            Arrays.asList(
+                new ColumnSchemaBuilder()
+                    .name("tag1")
+                    .dataType(TSDataType.STRING)
+                    .category(Tablet.ColumnCategory.TAG)
+                    .build(),
+                new ColumnSchemaBuilder()
+                    .name("tag2")
+                    .dataType(TSDataType.STRING)
+                    .category(Tablet.ColumnCategory.TAG)
+                    .build(),
+                new ColumnSchemaBuilder()
+                    .name("field1")
+                    .dataType(TSDataType.INT32)
+                    .category(Tablet.ColumnCategory.FIELD)
+                    .build(),
+                new ColumnSchemaBuilder()
+                    .name("field2")
+                    .dataType(TSDataType.BOOLEAN)
+                    .category(Tablet.ColumnCategory.FIELD)
+                    .build()));
+```
+
+#### Constrcut ITsFileWriter
+```java
 File f = new File("test.tsfile");
-TsFileWriter tsFileWriter = new TsFileWriter(f);
+ITsFileWriter writer =
+        new TsFileWriterBuilder()
+            .file(f)
+            .tableSchema(tableSchema)
+            .memoryThreshold(memoryThreshold)
+            .build();
 ```
 
-### Registration Time Series
+#### Build Tablet
+```java
+Tablet tablet =
+    new Tablet(
+        Arrays.asList("tag1", "tag2", "field1", "field2"),
+        Arrays.asList(
+            TSDataType.STRING, TSDataType.STRING, TSDataType.INT32, TSDataType.BOOLEAN));
+      for (int row = 0; row < 5; row++) {
+        long timestamp = row;
+        tablet.addTimestamp(row, timestamp);
+        tablet.addValue(row, "tag1", "tag1_value_1");
+        tablet.addValue(row, "tag2", "tag2_value_1");
+        tablet.addValue(row, "field1", row);
+        tablet.addValue(row, "field2", true);
+      }
+```
+#### Write Data
 
 ```shell
-List<MeasurementSchema> schema1 = new ArrayList<>();
-schema1.add(new MeasurementSchema("voltage", TSDataType.FLOAT));
-schema1.add(new MeasurementSchema("current", TSDataType.FLOAT));
-tsFileWriter.registerTimeseries(new Path("Solar_panel_1"), schema1);
-
-List<MeasurementSchema> schema2 = new ArrayList<>();
-schema2.add(new MeasurementSchema("voltage", TSDataType.FLOAT));
-schema2.add(new MeasurementSchema("current", TSDataType.FLOAT));
-schema2.add(new MeasurementSchema("wind_speed", TSDataType.FLOAT));
-tsFileWriter.registerTimeseries(new Path("Fan_1"), schema2);
+writer.write(tablet);
 ```
 
-### Write Data
+#### Close File
+
+```java
+writer.close();
+```
+
+#### Sample Code
+
+<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/v4/WriteTabletWithITsFileWriter.java>
+
+### Query Process
+
+#### Construct ITsFileReader
+
+```java
+File f = new File("test.tsfile");
+ITsFileReader reader = new TsFileReaderBuilder().file(f).build();
+```
+
+#### Query Data
+Query tag1, tag2, field1, field2 with a time range of [1,4]
+```java
+ResultSet resultSet = reader.query(tableName, Arrays.asList("tag1", "tag2", "field1", "field2"), 1, 4);
+```
+
+#### Check query result
 
 ```shell
-TSRecord tsRecord = new TSRecord(1, "Solar_panel_1");
-tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.FLOAT, "voltage", 1.1f));
-tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.FLOAT, "current", 2.2f));
-tsFileWriter.write(tsRecord);
+while (resultSet.next()) {
+  // columnIndex starts from 1
+  // first column is Time
+  // Time tag1 tag2 field1 field2
+  Long timeField = resultSet.getLong("Time");
+  String tag1 = resultSet.isNull("tag1") ? null : resultSet.getString("tag1");
+  String tag2 = resultSet.isNull("tag2") ? null : resultSet.getString("tag2");
+  Integer s1Field = resultSet.isNull("field1") ? null : resultSet.getInt(4);
+  Boolean s2Field = resultSet.isNull("field2") ? null : resultSet.getBoolean(5);
+}  
+ ```
+
+#### Close ResultSet
+```java
+resultSet.close();
 ```
 
-### Close File
-
-```shell
-tsFileWriter.close();
-```
-
-### Sample Code
-
-<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/TsFileWriteWithTSRecord.java>
-
-## Query Process
-
-### Construct TsFileReader
-
-```shell
-TsFileSequenceReader reader = new TsFileSequenceReader(path);
-TsFileReader tsFileReader = new TsFileReader(reader);
-```
-
-### Construct Query Request
-
-```shell
-ArrayList<Path> paths = new ArrayList<>();
-paths.add(new Path("Solar_panel_1", "voltage",true));
-paths.add(new Path("Solar_panel_1", "current",true));
-
-IExpression timeFilter =
-    BinaryExpression.and(
-        new GlobalTimeExpression(TimeFilterApi.gtEq(4L)),
-        new GlobalTimeExpression(TimeFilterApi.ltEq(10L)));
-
-QueryExpression queryExpression = QueryExpression.create(paths, timeFilter);
-```
-
-### Query Data
-
-```shell
-QueryDataSet queryDataSet = tsFileReader.query(queryExpression);
-while (queryDataSet.hasNext()) {
-  queryDataSet.next();
-}
-```
-
-### Close File
+#### Close File
 
 ```shell
 tsFileReader.close();
 ```
 
-### Sample Code
-
-<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/TsFileRead.java>
+#### Sample Code
+<https://github.com/apache/tsfile/blob/develop/java/examples/src/main/java/org/apache/tsfile/v4/ITsFileReaderAndITsFileWriter.java>
 
