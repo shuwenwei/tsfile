@@ -229,9 +229,9 @@ public class Tablet {
     this.insertTargetName = deviceId;
     this.schemas = schemas;
     setColumnCategories(ColumnCategory.nCopy(ColumnCategory.FIELD, schemas.size()));
-    this.setTimestamps(timestamps);
-    this.setValues(values);
-    this.setBitMaps(bitMaps);
+    this.timestamps = timestamps;
+    this.values = values;
+    this.bitMaps = bitMaps;
     this.maxRowNumber = maxRowNumber;
     // rowSize == maxRowNumber in this case
     this.rowSize = maxRowNumber;
@@ -251,9 +251,9 @@ public class Tablet {
     this.insertTargetName = tableName;
     this.schemas = schemas;
     setColumnCategories(columnCategories);
-    this.setTimestamps(timestamps);
-    this.setValues(values);
-    this.setBitMaps(bitMaps);
+    this.timestamps = timestamps;
+    this.values = values;
+    this.bitMaps = bitMaps;
     this.maxRowNumber = maxRowNumber;
     // rowSize == maxRowNumber in this case
     this.rowSize = maxRowNumber;
@@ -278,7 +278,7 @@ public class Tablet {
   }
 
   public void initBitMaps() {
-    this.setBitMaps(new BitMap[schemas.size()]);
+    this.bitMaps = new BitMap[schemas.size()];
     for (int column = 0; column < schemas.size(); column++) {
       BitMap bitMap = new BitMap(getMaxRowNumber());
       this.bitMaps[column] = bitMap;
@@ -567,13 +567,13 @@ public class Tablet {
 
   private void createColumns() {
     // create timestamp column
-    setTimestamps(new long[maxRowNumber]);
+    timestamps = new long[maxRowNumber];
 
     // calculate total value column size
     int valueColumnsSize = schemas.size();
 
     // value column
-    setValues(new Object[valueColumnsSize]);
+    values = new Object[valueColumnsSize];
     int columnIndex = 0;
     for (int i = 0; i < schemas.size(); i++) {
       IMeasurementSchema schema = schemas.get(i);
@@ -674,8 +674,7 @@ public class Tablet {
         } else {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(true), stream);
           ReadWriteIOUtils.write(rowSize, stream);
-          ReadWriteIOUtils.write(
-              new Binary(bitMaps[i].getTruncatedByteArray(rowSize)), stream);
+          ReadWriteIOUtils.write(new Binary(bitMaps[i].getTruncatedByteArray(rowSize)), stream);
         }
       }
     }
