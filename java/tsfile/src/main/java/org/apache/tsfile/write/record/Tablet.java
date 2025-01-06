@@ -281,13 +281,13 @@ public class Tablet {
     this.setBitMaps(new BitMap[schemas.size()]);
     for (int column = 0; column < schemas.size(); column++) {
       BitMap bitMap = new BitMap(getMaxRowNumber());
-      this.getBitMaps()[column] = bitMap;
+      this.bitMaps[column] = bitMap;
     }
   }
 
   @TsFileApi
   public void addTimestamp(int rowIndex, long timestamp) {
-    getTimestamps()[rowIndex] = timestamp;
+    timestamps[rowIndex] = timestamp;
     this.rowSize = Math.max(this.rowSize, rowIndex + 1);
     initBitMapsWithApiUsage();
   }
@@ -314,7 +314,7 @@ public class Tablet {
                     "Expected value of type Binary for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final Binary[] sensor = (Binary[]) getValues()[indexOfSchema];
+          final Binary[] sensor = (Binary[]) values[indexOfSchema];
           if (value instanceof Binary) {
             sensor[rowIndex] = (Binary) value;
           } else {
@@ -333,7 +333,7 @@ public class Tablet {
                     "Expected value of type Float for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final float[] sensor = (float[]) getValues()[indexOfSchema];
+          final float[] sensor = (float[]) values[indexOfSchema];
           sensor[rowIndex] = value != null ? (float) value : Float.MIN_VALUE;
           break;
         }
@@ -345,7 +345,7 @@ public class Tablet {
                     "Expected value of type Integer for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final int[] sensor = (int[]) getValues()[indexOfSchema];
+          final int[] sensor = (int[]) values[indexOfSchema];
           sensor[rowIndex] = value != null ? (int) value : Integer.MIN_VALUE;
           break;
         }
@@ -357,7 +357,7 @@ public class Tablet {
                     "Expected value of type LocalDate for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final LocalDate[] sensor = (LocalDate[]) getValues()[indexOfSchema];
+          final LocalDate[] sensor = (LocalDate[]) values[indexOfSchema];
           sensor[rowIndex] = value != null ? (LocalDate) value : EMPTY_DATE;
           break;
         }
@@ -370,7 +370,7 @@ public class Tablet {
                     "Expected value of type Long for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final long[] sensor = (long[]) getValues()[indexOfSchema];
+          final long[] sensor = (long[]) values[indexOfSchema];
           sensor[rowIndex] = value != null ? (long) value : Long.MIN_VALUE;
           break;
         }
@@ -382,7 +382,7 @@ public class Tablet {
                     "Expected value of type Double for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final double[] sensor = (double[]) getValues()[indexOfSchema];
+          final double[] sensor = (double[]) values[indexOfSchema];
           sensor[rowIndex] = value != null ? (double) value : Double.MIN_VALUE;
           break;
         }
@@ -394,7 +394,7 @@ public class Tablet {
                     "Expected value of type Boolean for data type %s, but got %s",
                     dataType, value.getClass().getName()));
           }
-          final boolean[] sensor = (boolean[]) getValues()[indexOfSchema];
+          final boolean[] sensor = (boolean[]) values[indexOfSchema];
           sensor[rowIndex] = value != null && (boolean) value;
           break;
         }
@@ -411,7 +411,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, int val) {
-    final int[] sensor = (int[]) getValues()[columnIndex];
+    final int[] sensor = (int[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -424,7 +424,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, long val) {
-    final long[] sensor = (long[]) getValues()[columnIndex];
+    final long[] sensor = (long[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -437,7 +437,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, float val) {
-    final float[] sensor = (float[]) getValues()[columnIndex];
+    final float[] sensor = (float[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -450,7 +450,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, double val) {
-    final double[] sensor = (double[]) getValues()[columnIndex];
+    final double[] sensor = (double[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -463,7 +463,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, boolean val) {
-    final boolean[] sensor = (boolean[]) getValues()[columnIndex];
+    final boolean[] sensor = (boolean[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -476,7 +476,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, String val) {
-    final Binary[] sensor = (Binary[]) getValues()[columnIndex];
+    final Binary[] sensor = (Binary[]) values[columnIndex];
     sensor[rowIndex] = new Binary(val, TSFileConfig.STRING_CHARSET);
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -489,7 +489,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, byte[] val) {
-    final Binary[] sensor = (Binary[]) getValues()[columnIndex];
+    final Binary[] sensor = (Binary[]) values[columnIndex];
     sensor[rowIndex] = new Binary(val);
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -502,7 +502,7 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, LocalDate val) {
-    final LocalDate[] sensor = (LocalDate[]) getValues()[columnIndex];
+    final LocalDate[] sensor = (LocalDate[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
   }
@@ -521,19 +521,19 @@ public class Tablet {
   private void updateBitMap(int rowIndex, int columnIndex, boolean mark) {
     initBitMapsWithApiUsage();
     if (mark) {
-      getBitMaps()[columnIndex].mark(rowIndex);
+      bitMaps[columnIndex].mark(rowIndex);
     } else {
-      getBitMaps()[columnIndex].unmark(rowIndex);
+      bitMaps[columnIndex].unmark(rowIndex);
     }
   }
 
   private void initBitMapsWithApiUsage() {
-    if (getBitMaps() == null) {
+    if (bitMaps == null) {
       initBitMaps();
     }
     if (!autoUpdateBitMaps) {
       autoUpdateBitMaps = true;
-      for (BitMap bitMap : getBitMaps()) {
+      for (BitMap bitMap : bitMaps) {
         bitMap.markAll();
       }
     }
@@ -551,8 +551,8 @@ public class Tablet {
   /** Reset Tablet to the default state - set the rowSize to 0 and reset bitMaps */
   public void reset() {
     this.rowSize = 0;
-    if (getBitMaps() != null) {
-      for (BitMap bitMap : getBitMaps()) {
+    if (bitMaps != null) {
+      for (BitMap bitMap : bitMaps) {
         if (bitMap == null) {
           continue;
         }
@@ -578,7 +578,7 @@ public class Tablet {
     for (int i = 0; i < schemas.size(); i++) {
       IMeasurementSchema schema = schemas.get(i);
       TSDataType dataType = schema.getType();
-      getValues()[columnIndex] = createValueColumnOfDataType(dataType);
+      values[columnIndex] = createValueColumnOfDataType(dataType);
       columnIndex++;
     }
   }
@@ -655,27 +655,27 @@ public class Tablet {
   }
 
   private void writeTimes(DataOutputStream stream) throws IOException {
-    ReadWriteIOUtils.write(BytesUtils.boolToByte(getTimestamps() != null), stream);
-    if (getTimestamps() != null) {
+    ReadWriteIOUtils.write(BytesUtils.boolToByte(timestamps != null), stream);
+    if (timestamps != null) {
       for (int i = 0; i < rowSize; i++) {
-        ReadWriteIOUtils.write(getTimestamps()[i], stream);
+        ReadWriteIOUtils.write(timestamps[i], stream);
       }
     }
   }
 
   /** Serialize {@link BitMap}s */
   private void writeBitMaps(DataOutputStream stream) throws IOException {
-    ReadWriteIOUtils.write(BytesUtils.boolToByte(getBitMaps() != null), stream);
-    if (getBitMaps() != null) {
+    ReadWriteIOUtils.write(BytesUtils.boolToByte(bitMaps != null), stream);
+    if (bitMaps != null) {
       int size = (schemas == null ? 0 : schemas.size());
       for (int i = 0; i < size; i++) {
-        if (getBitMaps()[i] == null || getBitMaps()[i].isAllUnmarked(rowSize)) {
+        if (bitMaps[i] == null || bitMaps[i].isAllUnmarked(rowSize)) {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(false), stream);
         } else {
           ReadWriteIOUtils.write(BytesUtils.boolToByte(true), stream);
           ReadWriteIOUtils.write(rowSize, stream);
           ReadWriteIOUtils.write(
-              new Binary(getBitMaps()[i].getTruncatedByteArray(rowSize)), stream);
+              new Binary(bitMaps[i].getTruncatedByteArray(rowSize)), stream);
         }
       }
     }
@@ -683,11 +683,11 @@ public class Tablet {
 
   /** Serialize values */
   private void writeValues(DataOutputStream stream) throws IOException {
-    ReadWriteIOUtils.write(BytesUtils.boolToByte(getValues() != null), stream);
-    if (getValues() != null) {
+    ReadWriteIOUtils.write(BytesUtils.boolToByte(values != null), stream);
+    if (values != null) {
       int size = (schemas == null ? 0 : schemas.size());
       for (int i = 0; i < size; i++) {
-        serializeColumn(schemas.get(i).getType(), getValues()[i], stream, columnCategories.get(i));
+        serializeColumn(schemas.get(i).getType(), values[i], stream, columnCategories.get(i));
       }
     }
   }
@@ -943,36 +943,36 @@ public class Tablet {
 
     // assert timestamps and bitmaps
     int columns = (schemas == null ? 0 : schemas.size());
-    if (!isTimestampsEqual(this.getTimestamps(), that.getTimestamps(), rowSize)
-        || !isBitMapsEqual(this.getBitMaps(), that.getBitMaps(), columns)) {
+    if (!isTimestampsEqual(this.timestamps, that.timestamps, rowSize)
+        || !isBitMapsEqual(this.bitMaps, that.bitMaps, columns)) {
       return false;
     }
 
     // assert values
-    Object[] thatValues = that.getValues();
-    if (thatValues == getValues()) {
+    Object[] thatValues = that.values;
+    if (thatValues == values) {
       return true;
     }
-    if (thatValues == null || getValues() == null) {
+    if (thatValues == null || values == null) {
       return false;
     }
-    if (thatValues.length != getValues().length) {
+    if (thatValues.length != values.length) {
       return false;
     }
-    for (int i = 0, n = getValues().length; i < n; i++) {
-      if (thatValues[i] == getValues()[i]) {
+    for (int i = 0, n = values.length; i < n; i++) {
+      if (thatValues[i] == values[i]) {
         continue;
       }
-      if (thatValues[i] == null || getValues()[i] == null) {
+      if (thatValues[i] == null || values[i] == null) {
         return false;
       }
-      if (!thatValues[i].getClass().equals(getValues()[i].getClass())) {
+      if (!thatValues[i].getClass().equals(values[i].getClass())) {
         return false;
       }
 
       switch (schemas.get(i).getType()) {
         case INT32:
-          int[] thisIntValues = (int[]) getValues()[i];
+          int[] thisIntValues = (int[]) values[i];
           int[] thatIntValues = (int[]) thatValues[i];
           if (thisIntValues.length < rowSize || thatIntValues.length < rowSize) {
             return false;
@@ -984,7 +984,7 @@ public class Tablet {
           }
           break;
         case DATE:
-          LocalDate[] thisDateValues = (LocalDate[]) getValues()[i];
+          LocalDate[] thisDateValues = (LocalDate[]) values[i];
           LocalDate[] thatDateValues = (LocalDate[]) thatValues[i];
           if (thisDateValues.length < rowSize || thatDateValues.length < rowSize) {
             return false;
@@ -997,7 +997,7 @@ public class Tablet {
           break;
         case INT64:
         case TIMESTAMP:
-          long[] thisLongValues = (long[]) getValues()[i];
+          long[] thisLongValues = (long[]) values[i];
           long[] thatLongValues = (long[]) thatValues[i];
           if (thisLongValues.length < rowSize || thatLongValues.length < rowSize) {
             return false;
@@ -1009,7 +1009,7 @@ public class Tablet {
           }
           break;
         case FLOAT:
-          float[] thisFloatValues = (float[]) getValues()[i];
+          float[] thisFloatValues = (float[]) values[i];
           float[] thatFloatValues = (float[]) thatValues[i];
           if (thisFloatValues.length < rowSize || thatFloatValues.length < rowSize) {
             return false;
@@ -1021,7 +1021,7 @@ public class Tablet {
           }
           break;
         case DOUBLE:
-          double[] thisDoubleValues = (double[]) getValues()[i];
+          double[] thisDoubleValues = (double[]) values[i];
           double[] thatDoubleValues = (double[]) thatValues[i];
           if (thisDoubleValues.length < rowSize || thatDoubleValues.length < rowSize) {
             return false;
@@ -1033,7 +1033,7 @@ public class Tablet {
           }
           break;
         case BOOLEAN:
-          boolean[] thisBooleanValues = (boolean[]) getValues()[i];
+          boolean[] thisBooleanValues = (boolean[]) values[i];
           boolean[] thatBooleanValues = (boolean[]) thatValues[i];
           if (thisBooleanValues.length < rowSize || thatBooleanValues.length < rowSize) {
             return false;
@@ -1047,7 +1047,7 @@ public class Tablet {
         case TEXT:
         case STRING:
         case BLOB:
-          Binary[] thisBinaryValues = (Binary[]) getValues()[i];
+          Binary[] thisBinaryValues = (Binary[]) values[i];
           Binary[] thatBinaryValues = (Binary[]) thatValues[i];
           if (thisBinaryValues.length < rowSize || thatBinaryValues.length < rowSize) {
             return false;
@@ -1126,7 +1126,7 @@ public class Tablet {
   }
 
   public boolean isNull(int i, int j) {
-    return getBitMaps() != null && getBitMaps()[j] != null && getBitMaps()[j].isMarked(i);
+    return bitMaps != null && bitMaps[j] != null && bitMaps[j].isMarked(i);
   }
 
   /**
@@ -1142,20 +1142,20 @@ public class Tablet {
       case BLOB:
       case TEXT:
       case STRING:
-        return ((Binary[]) getValues()[j])[i];
+        return ((Binary[]) values[j])[i];
       case INT32:
-        return ((int[]) getValues()[j])[i];
+        return ((int[]) values[j])[i];
       case FLOAT:
-        return ((float[]) getValues()[j])[i];
+        return ((float[]) values[j])[i];
       case DOUBLE:
-        return ((double[]) getValues()[j])[i];
+        return ((double[]) values[j])[i];
       case BOOLEAN:
-        return ((boolean[]) getValues()[j])[i];
+        return ((boolean[]) values[j])[i];
       case INT64:
       case TIMESTAMP:
-        return ((long[]) getValues()[j])[i];
+        return ((long[]) values[j])[i];
       case DATE:
-        return ((LocalDate[]) getValues()[j])[i];
+        return ((LocalDate[]) values[j])[i];
       default:
         throw new IllegalArgumentException("Unsupported type: " + schemas.get(j).getType());
     }
@@ -1218,7 +1218,6 @@ public class Tablet {
     this.values = values;
   }
 
-  /** Each {@link BitMap} represents the existence of each value in the current column. */
   public BitMap[] getBitMaps() {
     return bitMaps;
   }
