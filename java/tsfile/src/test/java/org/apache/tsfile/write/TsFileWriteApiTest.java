@@ -409,13 +409,13 @@ public class TsFileWriteApiTest {
         tablet.addTimestamp(row, startTime++);
         for (int i = 0; i < sensorNum - 1; i++) {
           if (i == 1 && r > 1000) {
-            tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
+            tablet.getBitMaps()[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
           tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
-          tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
+          tablet.getBitMaps()[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
           tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
@@ -458,13 +458,13 @@ public class TsFileWriteApiTest {
         tablet.addTimestamp(row, startTime++);
         for (int i = 0; i < sensorNum - 1; i++) {
           if (i == 1 && r > 1000) {
-            tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
+            tablet.getBitMaps()[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
           tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
-          tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
+          tablet.getBitMaps()[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
           tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
@@ -507,13 +507,13 @@ public class TsFileWriteApiTest {
         tablet.addTimestamp(row, startTime++);
         for (int i = 0; i < sensorNum - 1; i++) {
           if (i == 1 && r > 1000) {
-            tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
+            tablet.getBitMaps()[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
           tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
-          tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
+          tablet.getBitMaps()[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
           tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
@@ -581,13 +581,13 @@ public class TsFileWriteApiTest {
         tablet.addTimestamp(row, startTime++);
         for (int i = 0; i < sensorNum - 1; i++) {
           if (i == 1 && r > 1000) {
-            tablet.bitMaps[i].mark((int) r % tablet.getMaxRowNumber());
+            tablet.getBitMaps()[i].mark((int) r % tablet.getMaxRowNumber());
             continue;
           }
           tablet.addValue(row, i, "testString.........");
         }
         if (r > 1000) {
-          tablet.bitMaps[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
+          tablet.getBitMaps()[sensorNum - 1].mark((int) r % tablet.getMaxRowNumber());
         } else {
           tablet.addValue(row, sensorNum - 1, LocalDate.of(2024, 4, 1));
         }
