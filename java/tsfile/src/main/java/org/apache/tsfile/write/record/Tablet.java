@@ -411,6 +411,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, int val) {
+    if (!(values[columnIndex] instanceof int[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not INT32");
+    }
     final int[] sensor = (int[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
@@ -424,6 +428,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, long val) {
+    if (!(values[columnIndex] instanceof long[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not INT64/TIMESTAMP");
+    }
     final long[] sensor = (long[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
@@ -437,6 +445,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, float val) {
+    if (!(values[columnIndex] instanceof float[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not FLOAT");
+    }
     final float[] sensor = (float[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
@@ -450,6 +462,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, double val) {
+    if (!(values[columnIndex] instanceof double[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not DOUBLE");
+    }
     final double[] sensor = (double[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
@@ -463,6 +479,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, boolean val) {
+    if (!(values[columnIndex] instanceof boolean[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not BOOLEAN");
+    }
     final boolean[] sensor = (boolean[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
@@ -476,6 +496,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, String val) {
+    if (!(values[columnIndex] instanceof Binary[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not TEXT/STRING/BLOB");
+    }
     final Binary[] sensor = (Binary[]) values[columnIndex];
     sensor[rowIndex] = new Binary(val, TSFileConfig.STRING_CHARSET);
     updateBitMap(rowIndex, columnIndex, false);
@@ -489,6 +513,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, byte[] val) {
+    if (!(values[columnIndex] instanceof Binary[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not TEXT/STRING/BLOB");
+    }
     final Binary[] sensor = (Binary[]) values[columnIndex];
     sensor[rowIndex] = new Binary(val);
     updateBitMap(rowIndex, columnIndex, false);
@@ -502,6 +530,10 @@ public class Tablet {
 
   @TsFileApi
   public void addValue(int rowIndex, int columnIndex, LocalDate val) {
+    if (!(values[columnIndex] instanceof LocalDate[])) {
+      throw new IllegalArgumentException(
+          "The data type of column index " + columnIndex + " is not DATE");
+    }
     final LocalDate[] sensor = (LocalDate[]) values[columnIndex];
     sensor[rowIndex] = val;
     updateBitMap(rowIndex, columnIndex, false);
