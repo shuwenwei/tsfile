@@ -20,6 +20,7 @@ package org.apache.tsfile.write;
 
 import org.apache.tsfile.common.conf.TSFileDescriptor;
 import org.apache.tsfile.enums.TSDataType;
+import org.apache.tsfile.exception.read.ReadProcessException;
 import org.apache.tsfile.exception.write.WriteProcessException;
 import org.apache.tsfile.file.MetaMarker;
 import org.apache.tsfile.file.header.ChunkHeader;
@@ -36,6 +37,9 @@ import org.apache.tsfile.read.common.Chunk;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.expression.QueryExpression;
 import org.apache.tsfile.read.query.dataset.QueryDataSet;
+import org.apache.tsfile.read.query.dataset.ResultSet;
+import org.apache.tsfile.read.v4.ITsFileReader;
+import org.apache.tsfile.read.v4.TsFileReaderBuilder;
 import org.apache.tsfile.utils.TsFileGeneratorUtils;
 import org.apache.tsfile.write.chunk.AlignedChunkWriterImpl;
 import org.apache.tsfile.write.chunk.ChunkWriterImpl;
@@ -45,6 +49,8 @@ import org.apache.tsfile.write.record.datapoint.DateDataPoint;
 import org.apache.tsfile.write.record.datapoint.StringDataPoint;
 import org.apache.tsfile.write.schema.IMeasurementSchema;
 import org.apache.tsfile.write.schema.MeasurementSchema;
+import org.apache.tsfile.write.v4.ITsFileWriter;
+import org.apache.tsfile.write.v4.TsFileWriterBuilder;
 import org.apache.tsfile.write.writer.TsFileIOWriter;
 
 import org.junit.After;
@@ -925,6 +931,44 @@ public class TsFileWriteApiTest {
             columnSchema.getMeasurementName().toLowerCase(), columnSchema.getMeasurementName());
       }
       Assert.assertTrue(reader.getAllMeasurements().containsKey("measurementcolumn"));
+    }
+  }
+
+  @Test
+  public void writeAllNullValueTablet()
+      throws IOException, WriteProcessException, ReadProcessException {
+    setEnv(100 * 1024 * 1024, 10 * 1024);
+    Tablet tablet =
+        new Tablet(
+            "table1",
+            Arrays.asList("tag1", "field1"),
+            Arrays.asList(TSDataType.STRING, TSDataType.BOOLEAN),
+            Arrays.asList(Tablet.ColumnCategory.TAG, Tablet.ColumnCategory.FIELD));
+    tablet.addTimestamp(0, 0);
+    tablet.addTimestamp(1, 1);
+    TableSchema tableSchema =
+        new TableSchema(
+            "Table1",
+            Arrays.asList(
+                new ColumnSchema("tag1", TSDataType.STRING, Tablet.ColumnCategory.TAG),
+                new ColumnSchema("field1", TSDataType.BOOLEAN, Tablet.ColumnCategory.FIELD)));
+    Assert.assertEquals("table1", tableSchema.getTableName());
+    try (ITsFileWriter writer =
+        new TsFileWriterBuilder().file(f).tableSchema(tableSchema).build()) {
+      writer.write(tablet);
+    }
+    try (ITsFileReader reader = new TsFileReaderBuilder().file(f).build();
+        ResultSet resultSet =
+            reader.query(
+                "table1", Arrays.asList("tag1", "field1"), Long.MIN_VALUE, Long.MAX_VALUE)) {
+      Assert.assertTrue(resultSet.next());
+      Assert.assertEquals(0, resultSet.getLong(1));
+      Assert.assertTrue(resultSet.isNull(2));
+      Assert.assertTrue(resultSet.isNull(3));
+      Assert.assertTrue(resultSet.next());
+      Assert.assertEquals(1, resultSet.getLong(1));
+      Assert.assertTrue(resultSet.isNull(2));
+      Assert.assertTrue(resultSet.isNull(3));
     }
   }
 }
