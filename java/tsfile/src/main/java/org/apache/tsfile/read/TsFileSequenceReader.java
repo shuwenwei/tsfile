@@ -401,7 +401,7 @@ public class TsFileSequenceReader implements AutoCloseable {
       if (tsFileMetaData == null) {
         synchronized (this) {
           if (tsFileMetaData == null) {
-            tsFileMetaData = readFileMetadata(cacheTableSchemaMap, ioSizeRecorder);
+            tsFileMetaData = forceReadFileMetadata(cacheTableSchemaMap, ioSizeRecorder);
           }
         }
       }
@@ -423,7 +423,7 @@ public class TsFileSequenceReader implements AutoCloseable {
     if (tsFileMetaData != null && tsFileMetaData.hasTableSchemaMapCache()) {
       return tsFileMetaData.getTableSchemaMap();
     }
-    TsFileMetadata tempTsFileMetadata = readFileMetadata(true, ioSizeRecorder);
+    TsFileMetadata tempTsFileMetadata = forceReadFileMetadata(true, ioSizeRecorder);
     if (cacheTableSchemaMap) {
       synchronized (this) {
         this.tsFileMetaData = tempTsFileMetadata;
@@ -432,8 +432,8 @@ public class TsFileSequenceReader implements AutoCloseable {
     return tempTsFileMetadata.getTableSchemaMap();
   }
 
-  private TsFileMetadata readFileMetadata(boolean needTableSchemaMap, LongConsumer ioSizeRecorder)
-      throws IOException {
+  private TsFileMetadata forceReadFileMetadata(
+      boolean needTableSchemaMap, LongConsumer ioSizeRecorder) throws IOException {
     ByteBuffer buffer = readData(fileMetadataPos, fileMetadataSize, ioSizeRecorder);
     BufferDeserializer<TsFileMetadata> deserializer =
         needTableSchemaMap
