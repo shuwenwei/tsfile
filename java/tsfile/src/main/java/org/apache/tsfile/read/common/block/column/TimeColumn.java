@@ -211,4 +211,9 @@ public class TimeColumn implements Column {
 
   @Override
   public void setNull(int start, int end) {}
+
+  @Override
+  public void reset() {
+    setPositionCount(0);
+  }
 }
