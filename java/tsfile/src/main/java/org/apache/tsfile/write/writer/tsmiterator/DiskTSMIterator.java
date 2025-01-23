@@ -78,22 +78,24 @@ public class DiskTSMIterator extends TSMIterator {
   }
 
   @Override
-  public Pair<Path, TimeseriesMetadata> next() {
+  public Pair<Path, TimeseriesMetadata> next() throws IOException {
     try {
       if (remainsInFile) {
         // deserialize from file
-        return getTimeSerisMetadataFromFile();
+        return getTimeSeriesMetadataFromFile();
       } else {
         // get from memory iterator
         return super.next();
       }
     } catch (IOException e) {
-      LOG.error("Meets IOException when reading timeseries metadata from disk", e);
-      return null;
+      if (!Thread.currentThread().isInterrupted()) {
+        LOG.error("Meets IOException when reading timeseries metadata from disk", e);
+      }
+      throw e;
     }
   }
 
-  private Pair<Path, TimeseriesMetadata> getTimeSerisMetadataFromFile() throws IOException {
+  private Pair<Path, TimeseriesMetadata> getTimeSeriesMetadataFromFile() throws IOException {
     if (currentPos == nextEndPosForDevice) {
       // deserialize the current device name
       currentDevice = Deserializer.DEFAULT_DESERIALIZER.deserializeFrom(input.wrapAsInputStream());
