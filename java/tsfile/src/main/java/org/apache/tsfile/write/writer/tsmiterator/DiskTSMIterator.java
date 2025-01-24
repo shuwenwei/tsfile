@@ -28,6 +28,7 @@ import org.apache.tsfile.file.metadata.IDeviceID.Deserializer;
 import org.apache.tsfile.file.metadata.TimeseriesMetadata;
 import org.apache.tsfile.read.common.Path;
 import org.apache.tsfile.read.reader.LocalTsFileInput;
+import org.apache.tsfile.read.reader.TsFileInput;
 import org.apache.tsfile.utils.Pair;
 import org.apache.tsfile.utils.ReadWriteIOUtils;
 
@@ -51,8 +52,7 @@ public class DiskTSMIterator extends TSMIterator {
   private static final Logger LOG = LoggerFactory.getLogger(DiskTSMIterator.class);
 
   private LinkedList<Long> endPosForEachDevice;
-  private File cmtFile;
-  private LocalTsFileInput input;
+  protected TsFileInput input;
   private long fileLength = 0;
   private long currentPos = 0;
   private long nextEndPosForDevice = 0;
@@ -65,7 +65,6 @@ public class DiskTSMIterator extends TSMIterator {
       LinkedList<Long> endPosForEachDevice)
       throws IOException {
     super(chunkGroupMetadataList);
-    this.cmtFile = cmtFile;
     this.endPosForEachDevice = endPosForEachDevice;
     this.input = new LocalTsFileInput(cmtFile.toPath());
     this.fileLength = cmtFile.length();
